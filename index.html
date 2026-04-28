@@ -185,12 +185,14 @@ const firebaseConfig = {
 
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    function saveDrawing() {
-        const dataURL = canvas.toDataURL();
-        db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
-            sendRP("Enviou o desenho para o apresentador! 🎨");
-        });
-    }
+    ffunction saveDrawing() {
+    const dataURL = canvas.toDataURL();
+    // Primeiro guarda o desenho
+    db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
+        // Depois chama uma versão especial do sendRP que não precisa de texto
+        sendRP("Enviou um desenho para o confessionário! 🎨", true);
+    }).catch(err => alert("Erro ao guardar desenho: " + err));
+}
 
     function listen() {
         db.ref('rooms/' + currentRoom).on('value', (snap) => {
@@ -255,48 +257,59 @@ const firebaseConfig = {
         alert("Voto registado!");
     }
 
-    function sendRP(customText = null) {
-        const text = customText || document.getElementById('rp-text').value.trim();
-        if(!text) return alert("Escreve a tua ação!");
+   function sendRP(customText = null, isDrawingAction = false) {
+    const textInput = document.getElementById('rp-text');
+    const text = customText || textInput.value.trim();
 
-        db.ref('rooms/' + currentRoom).get().then(snap => {
-            const data = snap.val();
-            const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
-            const currentIndex = aliveIds.indexOf(myId);
-            const isLast = currentIndex === aliveIds.length - 1;
-            
-            let newDay = parseInt(data.day) || 1;
-            let nextPhase = data.phase || 'normal';
-            let updates = {};
+    // Só pede texto se NÃO for uma ação de desenho
+    if(!text && !isDrawingAction) return alert("Escreve a tua ação!");
 
-            if (isLast) {
-                newDay++;
-                // Se o Dia 3 acabou, calcular vencedor da Imunidade
-                if (newDay === 4) {
-                    let winnerId = null; let max = -1;
-                    const votes = data.drawingVotes || {};
-                    Object.keys(votes).forEach(id => { if(votes[id] > max) { max = votes[id]; winnerId = id; } });
-                    if(winnerId) {
-                        updates[`/players/${winnerId}/immune`] = true;
-                        updates['/lastRP'] = `🛡️ <b>A VOZ:</b> ${data.players[winnerId].name} ganhou a Prova Criativa e está IMUNE!`;
-                    }
-                    nextPhase = 'nomination';
-                } else if (newDay > 4) {
-                    nextPhase = 'nomination';
+    db.ref('rooms/' + currentRoom).get().then(snap => {
+        const data = snap.val();
+        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+        const currentIndex = aliveIds.indexOf(myId);
+        const isLast = currentIndex === aliveIds.length - 1;
+        
+        let newDay = parseInt(data.day) || 1;
+        let nextPhase = data.phase || 'normal';
+        let updates = {};
+
+        // Lógica de mudança de dia e imunidade
+        if (isLast) {
+            newDay++;
+            if (newDay === 4) {
+                let winnerId = null; let max = -1;
+                const votes = data.drawingVotes || {};
+                Object.keys(votes).forEach(id => { 
+                    if(votes[id] > max) { max = votes[id]; winnerId = id; } 
+                });
+                if(winnerId) {
+                    updates[`/players/${winnerId}/immune`] = true;
+                    updates['/lastRP'] = `🛡️ <b>A VOZ:</b> O desenho de ${data.players[winnerId].name} foi o favorito! Imunidade concedida.`;
                 }
+                nextPhase = 'nomination';
+            } else if (newDay > 4) {
+                nextPhase = 'nomination';
             }
+        }
 
-            updates['/players/' + myId + '/pop'] = (parseInt(data.players[myId].pop) || 50) + 5;
-            updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
-            updates['/day'] = newDay;
-            updates['/phase'] = nextPhase;
-            if(!updates['/lastRP']) updates['/lastRP'] = `🎬 <b>${myName}:</b> "${text}"`;
-            
-            db.ref('rooms/' + currentRoom).update(updates);
-            if(!customText) document.getElementById('rp-text').value = "";
-        });
-    }
-
+        updates['/players/' + myId + '/pop'] = (parseInt(data.players[myId].pop) || 50) + 5;
+        updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
+        updates['/day'] = newDay;
+        updates['/phase'] = nextPhase;
+        
+        // Define a mensagem que aparece no ecrã
+        if(isDrawingAction) {
+            updates['/lastRP'] = `🎨 <b>${myName}</b> terminou o seu desenho no confessionário!`;
+        } else {
+            updates['/lastRP'] = `🎬 <b>${myName}:</b> "${text}"`;
+        }
+        
+        db.ref('rooms/' + currentRoom).update(updates);
+        textInput.value = ""; // Limpa a caixa de texto
+        clearCanvas(); // Limpa o quadro para a próxima vez
+    });
+}
     function vote(tid) {
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
