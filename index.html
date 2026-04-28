@@ -19,23 +19,21 @@
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
-        /* Paleta de Cores */
         .color-picker { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
         .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--dark); cursor: pointer; transition: 0.2s; }
-        .color-btn:hover { transform: scale(1.1); }
-
+        
         #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; display: inline-block; }
         canvas { background: #fff; cursor: crosshair; touch-action: none; display: block; }
         
         .drawing-card { border: 4px solid var(--dark); margin: 10px; padding: 15px; border-radius: 20px; background: #fff; box-shadow: 4px 4px 0 var(--dark); }
-        .drawing-card img { width: 200px; height: 200px; border-radius: 10px; border: 2px solid var(--dark); }
+        .drawing-card img { width: 200px; height: 200px; border-radius: 10px; border: 2px solid var(--dark); display: block; margin: 0 auto 10px auto; }
         
         .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 100px; text-align: center; }
         .card.active { border-color: var(--pop-pink); background: white; transform: scale(1.05); box-shadow: 0 0 15px var(--pop-pink); }
         
         .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 20px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; }
         .chat-box { height: 250px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; text-align: left; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; box-sizing: border-box; }
+        textarea { width: 100%; padding: 12px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; resize: none; }
     </style>
 </head>
 <body>
@@ -43,25 +41,25 @@
     <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
         <div class="game-panel" style="max-width: 500px;">
             <div class="logo">BBB DUELO RP</div>
-            <p>20 Rodadas: Desenha, Conversa e Ganha Pontos!</p>
-            <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
-            <input type="text" id="my-name" placeholder="TEU NOME">
-            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
+            <p>20 Rodadas • Duelo de Desenho e Pontos ⭐</p>
+            <input type="text" id="room-id" style="width:100%; padding:12px; margin-bottom:10px;" placeholder="CÓDIGO DA SALA (ex: duelo1)">
+            <input type="text" id="my-name" style="width:100%; padding:12px; margin-bottom:10px;" placeholder="TEU NOME">
+            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NO DUELO 👁️</button>
         </div>
     </div>
 
     <div id="game-room" style="display:none;" class="main-container">
         <div class="side-panel">
-            <h3>👥 JOGADORES</h3>
+            <h3>👥 PLACAR</h3>
             <div id="players-grid" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;"></div>
         </div>
 
         <div class="game-panel">
             <div id="day-counter" style="font-weight: 900; font-size: 1.5em; color: var(--pop-pink);">RODADA 1 / 20</div>
-            <div class="rp-display" id="last-rp-action">A Voz: Sejam bem-vindos!</div>
+            <div class="rp-display" id="last-rp-action">A Voz: Bem-vindos ao duelo!</div>
 
             <div id="drawing-zone" style="display:none;">
-                <h3>🎨 DESAFIO: DESENHA ALGO!</h3>
+                <h3>🎨 A TUA VEZ DE DESENHAR!</h3>
                 <div class="color-picker">
                     <div class="color-btn" style="background: #000000" onclick="changeColor('#000000')"></div>
                     <div class="color-btn" style="background: #ff7675" onclick="changeColor('#ff7675')"></div>
@@ -71,7 +69,7 @@
                 </div>
                 <div id="canvas-container"><canvas id="paintCanvas" width="250" height="250"></canvas></div>
                 <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
-                <button class="btn-pop" style="background:var(--pop-teal); color:white;" onclick="saveDrawing()">ENVIAR DESENHO</button>
+                <button class="btn-pop" style="background:var(--pop-teal); color:white;" onclick="saveDrawing()">ENVIAR DESENHO ⭐</button>
             </div>
 
             <div id="gallery-zone" style="display:none;">
@@ -81,7 +79,7 @@
 
             <div id="controls" style="display:none;">
                 <div id="normal-actions">
-                    <textarea id="rp-text" placeholder="Escreve aqui a tua atuação de RP..." rows="3"></textarea>
+                    <textarea id="rp-text" placeholder="Escreve a tua ação de RP..." rows="3"></textarea>
                     <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR AÇÃO 🎬</button>
                 </div>
             </div>
@@ -90,7 +88,7 @@
         <div class="side-panel">
             <h3>💬 CHAT OFF</h3>
             <div id="chat-box" class="chat-box"></div>
-            <input type="text" id="chat-input" placeholder="Mensagem...">
+            <input type="text" id="chat-input" style="width:100%; padding:10px; margin: 10px 0;" placeholder="Conversar...">
             <button class="btn-pop" onclick="sendChat()">ENVIAR</button>
         </div>
     </div>
@@ -112,14 +110,14 @@
     function joinRoom() {
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         myName = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !myName) return alert("Preenche tudo!");
+        if(!currentRoom || !myName) return alert("Preenche os dados!");
         
         myId = myName.replace(/\s+/g, '_') + "_" + Math.floor(Math.random()*1000);
         const roomRef = db.ref('rooms/' + currentRoom);
 
         roomRef.get().then(snap => {
             if (!snap.exists()) {
-                roomRef.set({ round: 1, turn: myId, lastRP: "A VOZ: Duelo iniciado!" });
+                roomRef.set({ round: 1, turn: myId, lastRP: "A VOZ: Duelo artístico começou!" });
             }
             db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: myName, points: 0 });
             db.ref('rooms/' + currentRoom + '/players/' + myId).onDisconnect().remove();
@@ -144,7 +142,13 @@
             return { x: cx - r.left, y: cy - r.top };
         };
         canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x, p.y); });
-        canvas.addEventListener('mousemove', (e) => { if(!drawing) return; ctx.strokeStyle = currentColor; const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+        canvas.addEventListener('mousemove', (e) => { 
+            if(!drawing) return; 
+            ctx.strokeStyle = currentColor;
+            const p = getP(e); 
+            ctx.lineTo(p.x, p.y); 
+            ctx.stroke(); 
+        });
         window.addEventListener('mouseup', () => drawing = false);
     }
 
@@ -161,9 +165,9 @@
             const turn = data.turn;
 
             if(round > 20) {
-                let win = ""; let max = -1;
-                Object.values(players).forEach(p => { if(p.points > max){ max = p.points; win = p.name; }});
-                alert("FIM! Vencedor: " + win + " com " + max + " pontos!");
+                let winner = ""; let max = -1;
+                Object.values(players).forEach(p => { if((p.points||0) > max){ max = p.points; winner = p.name; }});
+                alert("🏆 FIM DO JOGO! Vencedor: " + winner + " com " + max + " pontos!");
                 db.ref('rooms/' + currentRoom).remove();
                 location.reload(); return;
             }
@@ -174,7 +178,7 @@
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
             Object.keys(players).forEach(id => {
-                grid.innerHTML += `<div class="card ${id === turn ? 'active' : ''}"><b>${players[id].name}</b><br>⭐ ${players[id].points}</div>`;
+                grid.innerHTML += `<div class="card ${id === turn ? 'active' : ''}"><b>${players[id].name}</b><br>⭐ ${players[id].points || 0}</div>`;
             });
 
             const isMyTurn = (turn === myId);
@@ -184,7 +188,6 @@
             document.getElementById('normal-actions').style.display = (!isDrawingRound && isMyTurn) ? 'block' : 'none';
             document.getElementById('drawing-zone').style.display = (isDrawingRound && isMyTurn) ? 'block' : 'none';
             
-            // Ver se há desenhos para votar (se não for o meu turno)
             const gallery = document.getElementById('gallery-zone');
             if(data.drawings && !isMyTurn) {
                 gallery.style.display = 'block';
@@ -192,7 +195,7 @@
                 disp.innerHTML = "";
                 Object.keys(data.drawings).forEach(pid => {
                     if(pid !== myId) {
-                        disp.innerHTML += `<div class="drawing-card"><img src="${data.drawings[pid]}"><button class="btn-pop" onclick="voteDrawing('${pid}')">DAR PONTO ⭐</button></div>`;
+                        disp.innerHTML += `<div class="drawing-card"><img src="${data.drawings[pid]}"><button class="btn-pop" style="background:#badc58" onclick="voteDrawing('${pid}')">DAR PONTO ⭐</button></div>`;
                     }
                 });
             } else { gallery.style.display = 'none'; }
@@ -209,9 +212,15 @@
     function saveDrawing() {
         const url = canvas.toDataURL();
         db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(url).then(() => {
-            updateTurn(`🎨 ${myName} enviou uma obra de arte!`, true);
+            updateTurn(`🎨 ${myName} enviou um desenho! Oponente, podes votar?`, true);
             clearCanvas();
         });
+    }
+
+    function voteDrawing(pid) {
+        db.ref('rooms/' + currentRoom + '/players/' + pid + '/points').transaction(p => (p || 0) + 10);
+        db.ref('rooms/' + currentRoom + '/drawings').remove();
+        alert("Voto registado!");
     }
 
     function updateTurn(msg, keepDrawings) {
@@ -229,12 +238,6 @@
             if(!keepDrawings) up.drawings = null;
             db.ref('rooms/' + currentRoom).update(up);
         });
-    }
-
-    function voteDrawing(pid) {
-        db.ref('rooms/' + currentRoom + '/players/' + pid + '/points').transaction(p => (p || 0) + 10);
-        db.ref('rooms/' + currentRoom + '/drawings').remove();
-        alert("Ponto enviado!");
     }
 
     function sendChat() {
