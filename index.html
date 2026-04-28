@@ -253,9 +253,24 @@ const firebaseConfig = {
     }
 
     function voteDrawing(pid) {
+    db.ref('rooms/' + currentRoom).get().then(snap => {
+        const data = snap.val();
+        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+        
+        // Regista o teu voto
         db.ref('rooms/' + currentRoom + '/drawingVotes/' + pid).transaction(v => (v || 0) + 1);
-        alert("Voto registado!");
-    }
+
+        // Verifica quantos votos já foram dados no total
+        const allVotes = data.drawingVotes ? Object.values(data.drawingVotes).reduce((a, b) => a + b, 0) : 0;
+        
+        // Se este for o último voto (total de votos = número de jogadores - 1, ou todos votarem)
+        if (allVotes + 1 >= aliveIds.length) {
+            finalizarConcurso(data, aliveIds);
+        } else {
+            alert("Voto registado! Aguarda que os teus colegas votem.");
+        }
+    });
+}
 
    function sendRP(customText = null, isDrawingAction = false) {
     const textInput = document.getElementById('rp-text');
@@ -367,6 +382,37 @@ const firebaseConfig = {
             box.scrollTop = box.scrollHeight;
         });
     }
+
+        function finalizarConcurso(data, aliveIds) {
+    db.ref('rooms/' + currentRoom + '/drawingVotes').get().then(snap => {
+        const votes = snap.val() || {};
+        let winnerId = null;
+        let max = -1;
+
+        // Descobre quem teve mais votos na galeria
+        Object.keys(votes).forEach(id => {
+            if (votes[id] > max) {
+                max = votes[id];
+                winnerId = id;
+            }
+        });
+
+        let updates = {};
+        if (winnerId) {
+            updates[`/players/${winnerId}/immune`] = true;
+            updates['/lastRP'] = `🛡️ <b>A VOZ:</b> O público escolheu! O desenho de <b>${data.players[winnerId].name}</b> venceu. Ganhou IMUNIDADE para o Dia 4!`;
+        }
+
+        // SALTO PARA O DIA 4 E NOMEAÇÕES
+        updates['/day'] = 4;
+        updates['/phase'] = 'nomination';
+        updates['/turn'] = aliveIds[0]; // Começa a votação pelo primeiro da lista
+        
+        db.ref('rooms/' + currentRoom).update(updates).then(() => {
+            alert("Concurso encerrado! Começam agora as nomeações.");
+        });
+    });
+}
         </script>
 
 </body>
