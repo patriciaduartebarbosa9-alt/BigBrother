@@ -130,9 +130,8 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
         </div>
     </div>
 
-<script>
-    // USANDO AS TUAS CHAVES
-    const firebaseConfig = {
+    <script>
+const firebaseConfig = {
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
         projectId: "bigbrother-termo",
@@ -153,37 +152,43 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
         myId = myName + "_" + Math.floor(Math.random()*1000);
         
         db.ref('rooms/' + currentRoom + '/day').transaction(d => d || 1);
-        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: myName, pop: 50, status: 'playing', votes: 0 });
+        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: myName, pop: 50, status: 'playing', votes: 0, immune: false });
         
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-room').style.display = 'flex';
+        initCanvas();
         listen();
         listenChat();
     }
 
     let canvas, ctx, drawing = false;
 
-    // Inicializa o Canvas após carregar a página
-    window.onload = () => {
+    function initCanvas() {
         canvas = document.getElementById('paintCanvas');
-        if(canvas) {
-            ctx = canvas.getContext('2d');
-            canvas.onmousedown = () => drawing = true;
-            canvas.onmouseup = () => { drawing = false; ctx.beginPath(); };
-            canvas.onmousemove = (e) => {
-                if(!drawing) return;
-                ctx.lineWidth = 5; ctx.lineCap = "round";
-                ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
-            };
-        }
-    };
+        ctx = canvas.getContext('2d');
+        
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        };
+
+        const start = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
+        const move = (e) => { if(!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); };
+        const stop = () => { drawing = false; };
+
+        canvas.addEventListener('mousedown', start); canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('mousemove', move); canvas.addEventListener('touchmove', move);
+        canvas.addEventListener('mouseup', stop); canvas.addEventListener('touchend', stop);
+    }
 
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
     function saveDrawing() {
         const dataURL = canvas.toDataURL();
         db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
-            sendRP("Desenhei algo incrível no confessionário! 🎨");
+            sendRP("Enviou o desenho para o apresentador! 🎨");
         });
     }
 
@@ -200,27 +205,23 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
             document.getElementById('day-counter').innerText = `DIA ${day}`;
             if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
 
-            // Mostrar/Esconder zonas conforme o Dia
+            // Zonas de Jogo Especial
             document.getElementById('drawing-zone').style.display = (day === 2 && turn === myId) ? 'block' : 'none';
             document.getElementById('gallery-zone').style.display = (day === 3) ? 'block' : 'none';
             document.getElementById('normal-actions').style.display = (day !== 2 && day !== 3 && phase !== 'nomination') ? 'block' : 'none';
 
-            // Lógica da Galeria (Dia 3)
             if(day === 3 && data.drawings) {
                 const gallery = document.getElementById('drawings-display');
                 gallery.innerHTML = "";
                 Object.keys(data.drawings).forEach(pid => {
-                    if(pid !== myId) {
-                        gallery.innerHTML += `
-                            <div class="drawing-card">
-                                <img src="${data.drawings[pid]}">
-                                <button class="btn-pop" style="font-size:10px" onclick="voteDrawing('${pid}')">VOTAR</button>
-                            </div>`;
-                    }
+                    gallery.innerHTML += `
+                        <div class="drawing-card">
+                            <img src="${data.drawings[pid]}">
+                            <button class="btn-pop" style="font-size:10px; background:var(--pop-teal)" onclick="voteDrawing('${pid}')">VOTAR</button>
+                        </div>`;
                 });
             }
 
-            // Grid de Jogadores (com ícone de Imunidade)
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
             Object.keys(players).forEach(id => {
@@ -231,7 +232,6 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
                 </div>`;
             });
 
-            // Controlos de Turno
             const isEliminated = players[myId].status === 'eliminated';
             document.getElementById('controls').style.display = (!isEliminated && turn === myId) ? 'block' : 'none';
             
@@ -252,21 +252,11 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
 
     function voteDrawing(pid) {
         db.ref('rooms/' + currentRoom + '/drawingVotes/' + pid).transaction(v => (v || 0) + 1);
-        sendRP("Votei no desenho que mais gostei! 🖼️");
+        alert("Voto registado!");
     }
 
-    // Na função vote(), quando o dia 3 acaba, calculamos o vencedor da imunidade
-    // Mas para simplificar, no sendRP() quando o dia passa de 3 para 4:
-    function checkWinner(data) {
-        const votes = data.drawingVotes || {};
-        let winner = null; let max = -1;
-        Object.keys(votes).forEach(id => {
-            if(votes[id] > max) { max = votes[id]; winner = id; }
-        });
-        return winner;
-    }
-  function sendRP() {
-        const text = document.getElementById('rp-text').value.trim();
+    function sendRP(customText = null) {
+        const text = customText || document.getElementById('rp-text').value.trim();
         if(!text) return alert("Escreve a tua ação!");
 
         db.ref('rooms/' + currentRoom).get().then(snap => {
@@ -277,24 +267,33 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
             
             let newDay = parseInt(data.day) || 1;
             let nextPhase = data.phase || 'normal';
+            let updates = {};
 
-            // GATILHO DE SEGURANÇA: Se já passou do dia 4, força a nomeação no próximo ciclo
             if (isLast) {
                 newDay++;
-                if (newDay >= 4) {
+                // Se o Dia 3 acabou, calcular vencedor da Imunidade
+                if (newDay === 4) {
+                    let winnerId = null; let max = -1;
+                    const votes = data.drawingVotes || {};
+                    Object.keys(votes).forEach(id => { if(votes[id] > max) { max = votes[id]; winnerId = id; } });
+                    if(winnerId) {
+                        updates[`/players/${winnerId}/immune`] = true;
+                        updates['/lastRP'] = `🛡️ <b>A VOZ:</b> ${data.players[winnerId].name} ganhou a Prova Criativa e está IMUNE!`;
+                    }
+                    nextPhase = 'nomination';
+                } else if (newDay > 4) {
                     nextPhase = 'nomination';
                 }
             }
 
-            let updates = {};
             updates['/players/' + myId + '/pop'] = (parseInt(data.players[myId].pop) || 50) + 5;
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
             updates['/day'] = newDay;
             updates['/phase'] = nextPhase;
-            updates['/lastRP'] = `🎬 <b>${myName}:</b> "${text}"`;
+            if(!updates['/lastRP']) updates['/lastRP'] = `🎬 <b>${myName}:</b> "${text}"`;
             
             db.ref('rooms/' + currentRoom).update(updates);
-            document.getElementById('rp-text').value = "";
+            if(!customText) document.getElementById('rp-text').value = "";
         });
     }
 
@@ -305,35 +304,32 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
             const currentIndex = aliveIds.indexOf(myId);
             const isLastVote = currentIndex === aliveIds.length - 1;
 
-            // 1. Regista o voto imediatamente no Firebase
-            const currentVotes = (data.players[tid].votes || 0) + 1;
-            
             let updates = {};
+            const currentVotes = (data.players[tid].votes || 0) + 1;
             updates[`/players/${tid}/votes`] = currentVotes;
             
-            // 2. Se for o último a votar, alguém TEM de sair
             if (isLastVote) {
                 let victimId = tid;
                 let maxVotes = currentVotes;
-
-                // Percorre todos para garantir que quem tem mais votos sai
                 aliveIds.forEach(id => {
                     let v = data.players[id].votes || 0;
-                    if(id === tid) v = currentVotes; // Usa o valor atualizado
-                    if (v > maxVotes) {
-                        maxVotes = v;
-                        victimId = id;
-                    }
+                    if(id === tid) v = currentVotes;
+                    if (v > maxVotes) { maxVotes = v; victimId = id; }
                 });
 
-                // EXPULSÃO FORÇADA
                 updates['/players/' + victimId + '/status'] = 'eliminated';
                 updates['/phase'] = 'normal';
-                updates['/day'] = 1; // Reinicia a contagem para a próxima expulsão
-                updates['/lastRP'] = `<b style="color:red">🔴 A VOZ: Com ${maxVotes} votos, ${data.players[victimId].name} está fora da casa!</b>`;
+                updates['/day'] = 1;
+                updates['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[victimId].name} foi expulso!`;
                 
-                // Limpa votos
-                aliveIds.forEach(id => updates[`/players/${id}/votes`] = 0);
+                // Limpa votos e imunidades para o próximo ciclo
+                aliveIds.forEach(id => {
+                    updates[`/players/${id}/votes`] = 0;
+                    updates[`/players/${id}/immune`] = false;
+                });
+                // Limpa desenhos e votos de desenhos
+                updates['/drawings'] = null;
+                updates['/drawingVotes'] = null;
             }
 
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
@@ -358,6 +354,7 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
             box.scrollTop = box.scrollHeight;
         });
     }
-</script>
+        </script>
+
 </body>
 </html>
