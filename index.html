@@ -3,108 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Duelo de Citações Mobile 👁️</title>
+    <title>Desenha e Adivinha PT-PT 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <style>
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
-        
         * { box-sizing: border-box; touch-action: manipulation; }
-        body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
+        body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); overflow: hidden; }
         
-        /* Layout Adaptável */
-        .main-layout { display: flex; flex-direction: column; gap: 15px; padding: 10px; max-width: 1200px; margin: 0 auto; }
-        
-        @media (min-width: 1024px) {
-            .main-layout { display: grid; grid-template-columns: 250px 1fr 300px; height: 95vh; }
-        }
+        .main-layout { display: flex; flex-direction: column; gap: 10px; padding: 10px; height: 100vh; }
+        @media (min-width: 1024px) { .main-layout { display: grid; grid-template-columns: 220px 1fr 300px; } }
 
-        .panel { background: white; border: 4px solid var(--dark); border-radius: 20px; box-shadow: 5px 5px 0 var(--dark); display: flex; flex-direction: column; overflow: hidden; margin-bottom: 10px; }
+        .panel { background: white; border: 4px solid var(--dark); border-radius: 20px; box-shadow: 4px 4px 0 var(--dark); display: flex; flex-direction: column; overflow: hidden; }
         .panel-header { background: var(--dark); color: white; padding: 8px; font-weight: 800; text-align: center; text-transform: uppercase; font-size: 0.8em; }
         
-        .game-panel { padding: 15px; text-align: center; overflow-y: auto; flex-grow: 1; }
-        .logo { font-family: 'Montserrat'; font-size: 1.5em; -webkit-text-stroke: 1px var(--dark); color: white; filter: drop-shadow(2px 2px 0 var(--pop-pink)); margin-bottom: 10px; text-transform: uppercase; }
+        .game-panel { padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; }
+        .timer { font-size: 1.5em; font-weight: 900; color: var(--pop-pink); background: var(--dark); padding: 5px 15px; border-radius: 50px; margin-bottom: 10px; }
         
-        .player-item { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 2px solid #eee; font-weight: 700; font-size: 0.9em; }
-        .player-item span { color: var(--pop-pink); }
+        .player-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 2px solid #eee; font-weight: 700; }
+        .player-item.turn { background: #fff3cd; }
 
-        .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; }
+        .btn-pop { width: 100%; padding: 10px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
-        .color-picker { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
-        .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--dark); cursor: pointer; }
+        .color-picker { display: flex; gap: 8px; margin-bottom: 10px; }
+        .color-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--dark); cursor: pointer; }
 
-        #canvas-container { position: relative; width: 100%; max-width: 400px; margin: 0 auto; background: white; line-height: 0; }
-        canvas { border: 3px solid var(--dark); border-radius: 15px; background: #fff; width: 100% !important; height: auto !important; touch-action: none; cursor: crosshair; }
+        #canvas-wrap { background: white; border: 3px solid var(--dark); border-radius: 15px; width: 100%; max-width: 500px; position: relative; line-height: 0; }
+        canvas { width: 100% !important; height: auto !important; touch-action: none; cursor: crosshair; }
         
-        .chat-container { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.9em; background: #fafafa; min-height: 150px; max-height: 300px; }
-        .status-msg { background: #fff3cd; border: 2px dashed var(--dark); padding: 8px; border-radius: 10px; margin-bottom: 10px; font-weight: 700; font-size: 0.85em; }
-        
-        .vote-card { border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin-top: 15px; background: #fdfdfd; }
-        .vote-card img { width: 100%; max-width: 300px; border-radius: 8px; border: 2px solid var(--dark); }
+        .chat-container { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.9em; background: #fafafa; }
+        .msg-correct { background: #55efc4 !important; font-weight: 900; padding: 5px; border-radius: 5px; text-align: center; }
 
-        input, textarea { width: 100%; padding: 10px; margin-bottom: 8px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; font-size: 16px; } /* font-size 16px evita zoom no iOS */
+        input { width: 100%; padding: 12px; border: 3px solid var(--dark); border-radius: 12px; font-size: 16px; }
+        .secret-word { font-size: 1.5em; color: var(--pop-teal); font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
-<div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
-    <div class="panel" style="max-width: 400px; padding: 30px; text-align: center; width: 100%;">
-        <div class="logo">DUELO CITAÇÕES</div>
-        <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
+<div id="lobby" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <div class="panel" style="width: 300px; padding: 20px; text-align: center;">
+        <h2>PICTIONARY PT</h2>
+        <input type="text" id="room-id" placeholder="CÓDIGO SALA" style="margin-bottom:10px">
         <input type="text" id="my-name" placeholder="TEU NOME">
-        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR</button>
+        <button class="btn-pop" style="background: var(--pop-pink); margin-top:15px" onclick="joinRoom()">JOGAR</button>
     </div>
 </div>
 
 <div id="game-area" class="main-layout" style="display:none;">
-    
     <div class="panel">
-        <div class="panel-header">PLACAR (ALVO: 100)</div>
+        <div class="panel-header">PONTOS (ALVO: 20)</div>
         <div id="players-list"></div>
     </div>
 
     <div class="panel game-panel">
-        <div id="status" class="status-msg">Aguardando...</div>
+        <div id="timer" class="timer">03:00</div>
         
-        <div id="phase-write" style="display:none;">
-            <h3>✍️ Escreve a tua frase:</h3>
-            <textarea id="phrase-input" rows="3"></textarea>
-            <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitPhrase()">ENVIAR</button>
-        </div>
-
-        <div id="phase-draw" style="display:none;">
-            <p>DESENHA:</p>
-            <div id="target-phrase" style="font-size: 1.2em; font-weight: 900; color: var(--pop-pink); margin-bottom: 10px;"></div>
-            <div class="color-picker" id="colors"></div>
-            <div id="canvas-container">
-                <canvas id="paintCanvas" width="400" height="400"></canvas>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
-                <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitDrawing()">ENVIAR</button>
+        <div id="draw-controls" style="display:none">
+            <p>DESENHA A PALAVRA:</p>
+            <div id="word-display" class="secret-word">---</div>
+            <div class="color-picker">
+                <div class="color-btn" style="background:#000" onclick="changeColor('#000')"></div>
+                <div class="color-btn" style="background:#d63031" onclick="changeColor('#d63031')"></div>
+                <div class="color-btn" style="background:#0984e3" onclick="changeColor('#0984e3')"></div>
+                <div class="color-btn" style="background:#00b894" onclick="changeColor('#00b894')"></div>
+                <button onclick="clearCanvas()" style="font-size:10px">LIMPAR</button>
             </div>
         </div>
 
-        <div id="phase-vote" style="display:none;">
-            <h3>⭐ VOTA NO MELHOR</h3>
-            <div id="vote-gallery"></div>
+        <div id="guess-controls" style="display:none">
+            <p>ADIVINHA O QUE ELE ESTÁ A DESENHAR!</p>
+            <div class="secret-word">? ? ? ? ?</div>
         </div>
 
-        <div id="phase-results" style="display:none;">
-            <h2 id="winner-text">🏆 FIM!</h2>
-            <button class="btn-pop" onclick="location.reload()">NOVO JOGO</button>
+        <div id="canvas-wrap">
+            <canvas id="paintCanvas" width="500" height="500"></canvas>
         </div>
     </div>
 
     <div class="panel">
-        <div class="panel-header">CHAT OFF</div>
+        <div class="panel-header">PALPITES</div>
         <div id="chat-box" class="chat-container"></div>
-        <div style="padding: 10px; border-top: 2px solid #eee;">
-            <input type="text" id="chat-input" placeholder="Conversar...">
-            <button class="btn-pop" style="font-size: 0.7em; margin-top: 5px;" onclick="sendChat()">ENVIAR</button>
+        <div style="padding:10px">
+            <input type="text" id="chat-input" placeholder="Escreve aqui a palavra...">
         </div>
     </div>
 </div>
@@ -119,175 +102,167 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let currentRoom = "", myId = "", myName = "";
-    let canvas, ctx, drawing = false, currentColor = "#000000";
+    
+    const PALAVRAS = ["televisão", "frigorífico", "autocarro", "pastilha", "telemóvel", "computador", "garrafa", "cadeira", "martelo", "bicicleta", "castelo", "guitarra", "lanterna", "sanduíche", "comboio", "sapato", "chapéu", "escada", "relógio", "caneta"];
+    
+    let currentRoom = "", myId = "", myName = "", isMaster = false;
+    let canvas, ctx, drawing = false, currentColor = "#000";
 
     function joinRoom() {
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         myName = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !myName) return alert("Preenche os campos!");
+        if(!currentRoom || !myName) return;
+        myId = myName + "_" + Math.floor(Math.random()*1000);
         
-        myId = myName.replace(/\s+/g, '_') + "_" + Math.floor(Math.random()*1000);
-        db.ref('duelo/'+currentRoom+'/players/'+myId).set({ name: myName, score: 0 });
-        db.ref('duelo/'+currentRoom+'/players/'+myId).onDisconnect().remove();
-
+        db.ref('pictionary/'+currentRoom+'/players/'+myId).set({ name: myName, score: 0 });
+        db.ref('pictionary/'+currentRoom+'/players/'+myId).onDisconnect().remove();
+        
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-area').style.display = (window.innerWidth >= 1024) ? 'grid' : 'flex';
+        
         initCanvas();
-        initColors();
         listen();
-        listenChat();
-    }
-
-    function initColors() {
-        const colors = ["#000000", "#ff7675", "#74b9ff", "#55efc4", "#a29bfe", "#fd79a8"];
-        const container = document.getElementById('colors');
-        container.innerHTML = "";
-        colors.forEach(c => {
-            const btn = document.createElement('div');
-            btn.className = 'color-btn';
-            btn.style.background = c;
-            btn.onclick = () => currentColor = c;
-            container.appendChild(btn);
-        });
     }
 
     function initCanvas() {
         canvas = document.getElementById('paintCanvas');
         ctx = canvas.getContext('2d');
-        ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = currentColor;
-
+        ctx.lineWidth = 5; ctx.lineCap = 'round';
+        
         const getPos = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            // Cálculo para manter a precisão mesmo com redimensionamento CSS
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+            const r = canvas.getBoundingClientRect();
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (cx - r.left) * (500 / r.width), y: (cy - r.top) * (500 / r.height) };
         };
 
-        const start = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); e.preventDefault(); };
-        const move = (e) => { if(!drawing) return; ctx.strokeStyle = currentColor; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); };
-        const stop = () => { drawing = false; };
+        const start = (e) => { 
+            if(!isMaster) return;
+            drawing = true; ctx.beginPath(); 
+            const p = getPos(e); ctx.moveTo(p.x, p.y); 
+        };
+        const move = (e) => {
+            if(!drawing || !isMaster) return;
+            const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle = currentColor; ctx.stroke();
+            sendStroke(p.x, p.y, false);
+        };
+        const stop = () => { drawing = false; sendStroke(0,0,true); };
 
-        canvas.addEventListener('mousedown', start);
-        canvas.addEventListener('mousemove', move);
-        window.addEventListener('mouseup', stop);
-
-        canvas.addEventListener('touchstart', start, {passive: false});
-        canvas.addEventListener('touchmove', move, {passive: false});
-        canvas.addEventListener('touchend', stop);
+        canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
+        canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', move); canvas.addEventListener('touchend', stop);
     }
 
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-    function submitPhrase() {
-        const p = document.getElementById('phrase-input').value.trim();
-        if(!p) return;
-        db.ref('duelo/'+currentRoom+'/phrases/'+myId).set(p);
-        document.getElementById('phrase-input').value = "";
+    function sendStroke(x, y, end) {
+        db.ref('pictionary/'+currentRoom+'/drawing').set({ x, y, end, color: currentColor, time: Date.now() });
     }
 
-    function submitDrawing() {
-        const data = canvas.toDataURL('image/png');
-        db.ref('duelo/'+currentRoom+'/drawings/'+myId).set(data);
-        clearCanvas();
-    }
+    function changeColor(c) { currentColor = c; }
+    function clearCanvas() { db.ref('pictionary/'+currentRoom+'/clear').set(Date.now()); }
 
-    function vote(id) {
-        db.ref('duelo/'+currentRoom+'/players/'+id+'/score').transaction(s => (s||0)+1);
-        db.ref('duelo/'+currentRoom+'/votes/'+myId).set(true);
-    }
+    // Lógica do Chat e Palpites
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+            const val = e.target.value.toLowerCase().trim();
+            if(!val) return;
+            db.ref('pictionary/'+currentRoom+'/lastGuess').set({ name: myName, msg: val, id: myId, time: Date.now() });
+            e.target.value = "";
+        }
+    });
 
     function listen() {
-        db.ref('duelo/'+currentRoom).on('value', snap => {
+        // Escutar desenho remoto
+        db.ref('pictionary/'+currentRoom+'/drawing').on('value', snap => {
+            if(isMaster) return;
+            const data = snap.val();
+            if(!data) return;
+            if(data.end) { ctx.beginPath(); return; }
+            ctx.strokeStyle = data.color;
+            ctx.lineTo(data.x, data.y); ctx.stroke();
+        });
+
+        db.ref('pictionary/'+currentRoom+'/clear').on('value', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+        });
+
+        // Escutar estado do jogo
+        db.ref('pictionary/'+currentRoom).on('value', snap => {
             const data = snap.val() || {};
             const players = data.players || {};
-            const pIds = Object.keys(players);
-            const numP = pIds.length;
-            if(numP === 0) return;
+            const pIds = Object.keys(players).sort();
+            if(pIds.length < 2) return;
 
+            // Placar e vencedor
             const list = document.getElementById('players-list');
             list.innerHTML = "";
-            let winner = null;
             pIds.forEach(id => {
                 const s = players[id].score || 0;
-                list.innerHTML += `<div class="player-item">${players[id].name} <span>${s} PTS</span></div>`;
-                if(s >= 100) winner = players[id].name;
+                list.innerHTML += `<div class="player-item"> ${players[id].name} <span>${s} PTS</span></div>`;
+                if(s >= 20) {
+                    alert("🏆 " + players[id].name + " VENCEU!");
+                    db.ref('pictionary/'+currentRoom).remove();
+                    location.reload();
+                }
             });
 
-            if(winner) {
-                document.getElementById('phase-write').style.display = 'none';
-                document.getElementById('phase-draw').style.display = 'none';
-                document.getElementById('phase-vote').style.display = 'none';
-                document.getElementById('phase-results').style.display = 'block';
-                document.getElementById('winner-text').innerText = "🏆 " + winner + " VENCEU!";
-                return;
-            }
+            // Turnos e Mestre
+            const round = data.round || 0;
+            const mId = pIds[round % pIds.length];
+            isMaster = (myId === mId);
+            
+            document.getElementById('draw-controls').style.display = isMaster ? 'block' : 'none';
+            document.getElementById('guess-controls').style.display = isMaster ? 'none' : 'block';
 
-            const phrases = data.phrases || {};
-            const drawings = data.drawings || {};
-            const votes = data.votes || {};
-
-            if (Object.keys(votes).length >= numP && numP > 1) {
-                if (myId === pIds[0]) {
-                    setTimeout(() => {
-                        db.ref('duelo/'+currentRoom+'/phrases').remove();
-                        db.ref('duelo/'+currentRoom+'/drawings').remove();
-                        db.ref('duelo/'+currentRoom+'/votes').remove();
-                    }, 2000);
-                }
-                document.getElementById('status').innerText = "Turno encerrado. Próximo em instantes...";
-                return;
+            // Gerar palavra se não houver
+            if(isMaster && !data.word) {
+                const word = PALAVRAS[Math.floor(Math.random()*PALAVRAS.length)];
+                db.ref('pictionary/'+currentRoom+'/word').set(word);
+                db.ref('pictionary/'+currentRoom+'/startTime').set(Date.now());
             }
+            document.getElementById('word-display').innerText = data.word || "...";
 
-            if(Object.keys(phrases).length < numP) {
-                document.getElementById('phase-write').style.display = 'block';
-                document.getElementById('phase-draw').style.display = 'none';
-                document.getElementById('phase-vote').style.display = 'none';
-                document.getElementById('status').innerText = "FASE: ESCREVER";
-            } 
-            else if(Object.keys(drawings).length < numP) {
-                document.getElementById('phase-write').style.display = 'none';
-                document.getElementById('phase-draw').style.display = 'block';
-                document.getElementById('phase-vote').style.display = 'none';
-                const myIdx = pIds.indexOf(myId);
-                const targetId = pIds[(myIdx + 1) % numP];
-                document.getElementById('target-phrase').innerText = phrases[targetId];
-                document.getElementById('status').innerText = "FASE: DESENHAR";
-            }
-            else {
-                document.getElementById('phase-draw').style.display = 'none';
-                document.getElementById('phase-vote').style.display = 'block';
-                document.getElementById('status').innerText = "FASE: VOTAR";
-                const gal = document.getElementById('vote-gallery');
-                gal.innerHTML = "";
-                if(votes[myId]) {
-                    gal.innerHTML = "<h4>Voto registado! Aguarda...</h4>";
-                } else {
-                    Object.keys(drawings).forEach(pid => {
-                        if(pid !== myId) {
-                            gal.innerHTML += `<div class="vote-card"><p>Desenho de: ${players[pid].name}</p><img src="${drawings[pid]}"><button class="btn-pop" onclick="vote('${pid}')">VOTAR ⭐</button></div>`;
-                        }
-                    });
+            // Timer (3 min = 180s)
+            if(data.startTime) {
+                const diff = Math.floor((Date.now() - data.startTime) / 1000);
+                const remaining = Math.max(0, 180 - diff);
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                document.getElementById('timer').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                
+                if(remaining === 0 && isMaster) { // Tempo acabou
+                    db.ref('pictionary/'+currentRoom+'/round').transaction(r => (r||0)+1);
+                    db.ref('pictionary/'+currentRoom+'/word').remove();
                 }
             }
         });
-    }
 
-    function sendChat() {
-        const i = document.getElementById('chat-input');
-        if(!i.value) return;
-        db.ref('duelo/'+currentRoom+'/chat').push({ name: myName, msg: i.value });
-        i.value = "";
-    }
+        // Escutar palpites
+        db.ref('pictionary/'+currentRoom+'/lastGuess').on('value', snap => {
+            const g = snap.val();
+            if(!g) return;
+            const box = document.getElementById('chat-box');
+            
+            db.ref('pictionary/'+currentRoom+'/word').get().then(wordSnap => {
+                const secret = wordSnap.val();
+                let isCorrect = (g.msg === secret);
+                
+                const div = document.createElement('div');
+                div.className = isCorrect ? 'msg-correct' : '';
+                div.innerHTML = `<b>${g.name}:</b> ${isCorrect ? 'ACERTOU A PALAVRA!' : g.msg}`;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
 
-    function listenChat() {
-        db.ref('duelo/'+currentRoom+'/chat').limitToLast(15).on('value', snap => {
-            const box = document.getElementById('chat-box'); box.innerHTML = "";
-            snap.forEach(c => { box.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`; });
-            box.scrollTop = box.scrollHeight;
+                if(isCorrect && isMaster) {
+                    // Dar pontos a ambos e mudar rodada
+                    db.ref('pictionary/'+currentRoom+'/players/'+g.id+'/score').transaction(s => (s||0)+1);
+                    db.ref('pictionary/'+currentRoom+'/players/'+myId+'/score').transaction(s => (s||0)+1);
+                    setTimeout(() => {
+                        db.ref('pictionary/'+currentRoom+'/round').transaction(r => (r||0)+1);
+                        db.ref('pictionary/'+currentRoom+'/word').remove();
+                        db.ref('pictionary/'+currentRoom+'/clear').set(Date.now());
+                    }, 1000);
+                }
+            });
         });
     }
 </script>
