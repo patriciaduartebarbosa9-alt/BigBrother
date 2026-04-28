@@ -2,73 +2,81 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <title>Gartic Storyboard 🖍️</title>
+    <title>Duelo de Citações 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <style>
-        :root { --bg: #6c5ce7; --panel: #ffffff; --accent: #00ce9e; --text: #2d3436; }
-        body { font-family: 'Outfit'; background: var(--bg); margin: 0; color: var(--text); }
+        :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
+        body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
         
         .container { max-width: 900px; margin: 20px auto; padding: 20px; }
-        .card-panel { background: var(--panel); border-radius: 25px; border: 5px solid var(--text); box-shadow: 10px 10px 0 var(--text); padding: 30px; text-align: center; }
+        .game-panel { background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; }
         
-        .logo { font-family: 'Montserrat'; font-size: 2.5em; color: white; -webkit-text-stroke: 1.5px var(--text); text-shadow: 4px 4px 0 var(--accent); margin-bottom: 20px; }
+        .logo { font-family: 'Montserrat'; font-size: 2.2em; -webkit-text-stroke: 1.5px var(--dark); color: white; filter: drop-shadow(3px 3px 0 var(--pop-pink)); margin-bottom: 15px; text-transform: uppercase; }
+        .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
+        .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
-        .btn { background: var(--accent); color: white; border: 3px solid var(--text); padding: 15px 30px; border-radius: 15px; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 var(--text); text-transform: uppercase; }
-        .btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--text); }
+        /* Paleta de Cores Anterior */
+        .color-picker { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
+        .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--dark); cursor: pointer; transition: 0.2s; }
 
-        #canvas-container { background: #eee; border: 3px solid var(--text); border-radius: 15px; margin: 20px auto; display: inline-block; }
-        canvas { background: white; cursor: crosshair; touch-action: none; display: block; }
+        #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; display: inline-block; }
+        canvas { background: #fff; cursor: crosshair; touch-action: none; display: block; }
         
-        .color-picker { display: flex; gap: 10px; justify-content: center; margin: 10px; }
-        .color-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--text); cursor: pointer; }
-
-        .status-bar { background: #ffeaa7; padding: 10px; border-radius: 10px; border: 2px solid var(--text); margin-bottom: 20px; font-weight: 800; }
-        .drawing-vote { border: 4px solid var(--text); border-radius: 20px; padding: 15px; margin-top: 20px; }
-        .drawing-vote img { max-width: 100%; border-radius: 10px; border: 2px solid var(--text); }
+        .status-msg { background: #fff3cd; border: 2px dashed var(--dark); padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: 700; }
+        .vote-card { border: 4px solid var(--dark); border-radius: 20px; padding: 15px; margin-top: 20px; background: #f9f9f9; }
+        .vote-card img { width: 100%; max-width: 400px; border-radius: 10px; border: 2px solid var(--dark); }
         
-        input, textarea { width: 100%; padding: 15px; border: 3px solid var(--text); border-radius: 12px; font-family: 'Outfit'; font-size: 1.1em; margin-bottom: 15px; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; box-sizing: border-box; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="lobby" class="card-panel">
-        <div class="logo">GARTIC STORY 👁️</div>
+    <div id="lobby" class="game-panel">
+        <div class="logo">DUELO DE CITAÇÕES</div>
+        <p>Escreve, Desenha e Vota!</p>
         <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
         <input type="text" id="my-name" placeholder="TEU NOME">
-        <button class="btn" onclick="joinRoom()">Começar Jogo 🚀</button>
+        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NO JOGO 👁️</button>
     </div>
 
-    <div id="game-area" class="card-panel" style="display:none;">
-        <div id="status" class="status-bar">Aguardando outros jogadores...</div>
+    <div id="game-area" class="game-panel" style="display:none;">
+        <div id="status" class="status-msg">Aguardando jogadores...</div>
         
         <div id="phase-write" style="display:none;">
-            <h3>✍️ Escreve uma frase criativa:</h3>
-            <textarea id="phrase-input" placeholder="Ex: Um gato azul a dançar no espaço..."></textarea>
-            <button class="btn" onclick="submitPhrase()">Enviar Frase</button>
+            <h3>✍️ Escreve uma citação ou frase:</h3>
+            <textarea id="phrase-input" placeholder="Ex: Um astronauta a comer pizza na lua..." rows="3"></textarea>
+            <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitPhrase()">ENVIAR FRASE</button>
         </div>
 
         <div id="phase-draw" style="display:none;">
-            <h3>🎨 Desenha isto:</h3>
-            <div id="target-phrase" style="font-size: 1.5em; font-weight: 900; color: var(--bg); margin-bottom: 15px;"></div>
-            <div class="color-picker" id="colors"></div>
-            <div id="canvas-container"><canvas id="paintCanvas" width="400" height="300"></canvas></div>
-            <br>
-            <button class="btn" style="background: #ff7675;" onclick="clearCanvas()">Limpar</button>
-            <button class="btn" onclick="submitDrawing()">Finalizar Desenho</button>
+            <h3>🎨 DESENHA A CITAÇÃO:</h3>
+            <div id="target-phrase" style="font-size: 1.4em; font-weight: 900; color: var(--pop-pink); margin-bottom: 15px; text-transform: uppercase;"></div>
+            
+            <div class="color-picker">
+                <div class="color-btn" style="background: #000000" onclick="changeColor('#000000')"></div>
+                <div class="color-btn" style="background: #ff7675" onclick="changeColor('#ff7675')"></div>
+                <div class="color-btn" style="background: #74b9ff" onclick="changeColor('#74b9ff')"></div>
+                <div class="color-btn" style="background: #55efc4" onclick="changeColor('#55efc4')"></div>
+                <div class="color-btn" style="background: #a29bfe" onclick="changeColor('#a29bfe')"></div>
+            </div>
+
+            <div id="canvas-container"><canvas id="paintCanvas" width="350" height="300"></canvas></div>
+            <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
+            <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitDrawing()">ENVIAR DESENHO</button>
         </div>
 
         <div id="phase-vote" style="display:none;">
-            <h3>⭐ Vota no melhor desenho!</h3>
+            <h3>⭐ QUAL O MELHOR DESENHO?</h3>
             <div id="vote-gallery"></div>
         </div>
 
         <div id="phase-results" style="display:none;">
             <h2 id="winner-text"></h2>
-            <button class="btn" onclick="location.reload()">Jogar Novamente</button>
+            <button class="btn-pop" onclick="location.reload()">JOGAR NOVAMENTE</button>
         </div>
     </div>
 </div>
@@ -89,30 +97,17 @@
     function joinRoom() {
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         myName = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !myName) return alert("Preenche tudo!");
+        if(!currentRoom || !myName) return alert("Preenche os dados!");
         
         myId = myName.replace(/\s+/g, '_') + "_" + Math.floor(Math.random()*1000);
         
-        db.ref('gartic/'+currentRoom+'/players/'+myId).set({ name: myName, score: 0 });
-        db.ref('gartic/'+currentRoom+'/players/'+myId).onDisconnect().remove();
+        db.ref('duelo/'+currentRoom+'/players/'+myId).set({ name: myName, score: 0 });
+        db.ref('duelo/'+currentRoom+'/players/'+myId).onDisconnect().remove();
 
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-area').style.display = 'block';
         initCanvas();
-        initColors();
         listen();
-    }
-
-    function initColors() {
-        const colors = ["#000000", "#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#e84393"];
-        const container = document.getElementById('colors');
-        colors.forEach(c => {
-            const d = document.createElement('div');
-            d.className = 'color-dot';
-            d.style.background = c;
-            d.onclick = () => currentColor = c;
-            container.appendChild(d);
-        });
     }
 
     function initCanvas() {
@@ -130,87 +125,81 @@
         window.addEventListener('mouseup', () => drawing = false);
     }
 
+    function changeColor(c) { currentColor = c; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
     function submitPhrase() {
-        const p = document.getElementById('phrase-input').value;
+        const p = document.getElementById('phrase-input').value.trim();
         if(!p) return;
-        db.ref('gartic/'+currentRoom+'/phrases/'+myId).set(p);
+        db.ref('duelo/'+currentRoom+'/phrases/'+myId).set(p);
         document.getElementById('phase-write').style.display = 'none';
-        document.getElementById('status').innerText = "Frase enviada! Aguarda...";
     }
 
     function submitDrawing() {
         const data = canvas.toDataURL();
-        db.ref('gartic/'+currentRoom+'/drawings/'+myId).set(data);
+        db.ref('duelo/'+currentRoom+'/drawings/'+myId).set(data);
         document.getElementById('phase-draw').style.display = 'none';
-        document.getElementById('status').innerText = "Desenho enviado! Aguarda...";
     }
 
     function vote(id) {
-        db.ref('gartic/'+currentRoom+'/players/'+id+'/score').transaction(s => (s||0)+1);
-        db.ref('gartic/'+currentRoom+'/votes/'+myId).set(true);
+        db.ref('duelo/'+currentRoom+'/players/'+id+'/score').transaction(s => (s||0)+1);
+        db.ref('duelo/'+currentRoom+'/votes/'+myId).set(true);
     }
 
     function listen() {
-        db.ref('gartic/'+currentRoom).on('value', snap => {
+        db.ref('duelo/'+currentRoom).on('value', snap => {
             const data = snap.val();
             if(!data) return;
             const players = data.players || {};
-            const playerIds = Object.keys(players);
-            const numPlayers = playerIds.length;
-
+            const pIds = Object.keys(players);
+            const numP = pIds.length;
             const phrases = data.phrases || {};
             const drawings = data.drawings || {};
             const votes = data.votes || {};
 
-            // 1. Fase de Escrita
-            if(Object.keys(phrases).length < numPlayers) {
+            // LÓGICA DE FASES
+            if(Object.keys(phrases).length < numP) {
+                document.getElementById('status').innerText = "FASE 1: Escrevam as vossas citações!";
                 document.getElementById('phase-write').style.display = 'block';
-                document.getElementById('status').innerText = "FASE: Escrita";
             } 
-            // 2. Fase de Desenho
-            else if(Object.keys(drawings).length < numPlayers) {
+            else if(Object.keys(drawings).length < numP) {
+                document.getElementById('status').innerText = "FASE 2: Desenha a citação do rival!";
                 document.getElementById('phase-write').style.display = 'none';
                 document.getElementById('phase-draw').style.display = 'block';
-                document.getElementById('status').innerText = "FASE: Desenhar a frase do outro";
                 
-                // Pegar a frase do jogador "vizinho"
-                const myIndex = playerIds.indexOf(myId);
-                const targetIndex = (myIndex + 1) % numPlayers;
-                const targetId = playerIds[targetIndex];
-                document.getElementById('target-phrase').innerText = `"${phrases[targetId]}"`;
+                // Atribui a frase do "vizinho"
+                const myIdx = pIds.indexOf(myId);
+                const targetIdx = (myIdx + 1) % numP;
+                document.getElementById('target-phrase').innerText = phrases[pIds[targetIdx]];
             }
-            // 3. Fase de Votação
-            else if(Object.keys(votes).length < numPlayers) {
+            else if(Object.keys(votes).length < numP) {
+                document.getElementById('status').innerText = "FASE 3: Votação!";
                 document.getElementById('phase-draw').style.display = 'none';
                 document.getElementById('phase-vote').style.display = 'block';
-                document.getElementById('status').innerText = "FASE: Votação";
                 
                 const gal = document.getElementById('vote-gallery');
                 gal.innerHTML = "";
                 Object.keys(drawings).forEach(pid => {
                     if(pid !== myId) {
                         gal.innerHTML += `
-                            <div class="drawing-vote">
+                            <div class="vote-card">
                                 <p>Desenho de <b>${players[pid].name}</b></p>
-                                <img src="${drawings[pid]}"><br><br>
-                                <button class="btn" onclick="vote('${pid}')">VOTAR ⭐</button>
+                                <img src="${drawings[pid]}">
+                                <button class="btn-pop" style="background:#badc58" onclick="vote('${pid}')">VOTAR ⭐</button>
                             </div>`;
                     }
                 });
             }
-            // 4. Resultados
             else {
                 document.getElementById('phase-vote').style.display = 'none';
                 document.getElementById('phase-results').style.display = 'block';
-                document.getElementById('status').innerText = "RESULTADOS FINAIS";
+                document.getElementById('status').innerText = "RESULTADOS!";
                 
-                let winner = ""; let max = -1;
-                playerIds.forEach(id => {
-                    if(players[id].score > max) { max = players[id].score; winner = players[id].name; }
+                let win = ""; let max = -1;
+                pIds.forEach(id => {
+                    if(players[id].score > max) { max = players[id].score; win = players[id].name; }
                 });
-                document.getElementById('winner-text').innerText = `🏆 O vencedor é ${winner} com ${max} votos!`;
+                document.getElementById('winner-text').innerText = `🏆 ${win} venceu com ${max} votos!`;
             }
         });
     }
