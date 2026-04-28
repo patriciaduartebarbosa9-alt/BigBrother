@@ -2,7 +2,7 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <title>BB RP Portugal 👁️</title>
+    <title>BBB RP Portugal 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
@@ -22,83 +22,96 @@
         .chat-box { height: 350px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
         .chat-msg { margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee; }
 
-        .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 85px; text-align: center; }
+        .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 85px; text-align: center; transition: 0.3s; }
         .card.active { border-color: var(--pop-pink); background: white; transform: scale(1.1); box-shadow: 0 0 15px var(--pop-pink); }
         .card.eliminated { background: #636e72 !important; opacity: 0.5; filter: grayscale(1); }
 
-        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; box-sizing: border-box; font-family: 'Outfit'; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; box-sizing: border-box; font-family: 'Outfit'; font-weight: 600; }
         
-        /* Destaque para a ação de RP */
-        .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 15px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; }
+        .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 20px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+        
+        .step-box { background: #f0f0f0; padding: 15px; border-radius: 12px; border-left: 5px solid var(--pop-pink); margin-bottom: 10px; text-align: left; font-size: 0.85em; }
     </style>
 </head>
 <body>
 
-    <div id="lobby" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-        <div class="game-panel" style="max-width: 400px;">
+    <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
+        <div class="game-panel" style="max-width: 500px;">
             <div class="logo">BBB RP PORTUGAL</div>
-            <p><b>CRIE A SUA PERSONAGEM!</b></p>
-            <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
-            <input type="text" id="my-name" placeholder="TEU NOME (ex: Tiago Brunet)">
-            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
-            <div style="text-align: left; font-size: 0.8em; margin-top: 20px; background: #eee; padding: 10px; border-radius: 10px;">
-                <b>COMO FUNCIONA O RP:</b><br>
-                • No teu turno, escolhes uma ação de Roleplay.<br>
-                • Escreve o que a tua personagem está a fazer ou dizer.<br>
-                • De 4 em 4 dias, os jogadores votam baseados no comportamento!
+            
+            <div style="margin-bottom: 20px;">
+                <div class="step-box">
+                    <b>1. O QUE É ESTE JOGO?</b><br>
+                    É um jogo de interpretação (Roleplay). Tu és um concorrente do Big Brother e tens de atuar para convencer os teus colegas a não te expulsarem!
+                </div>
+                <div class="step-box">
+                    <b>2. COMO JOGAR?</b><br>
+                    No teu turno, escreve uma ação (ex: "Fui fazer o jantar e queimei a comida"). Todos vão ler a tua "atuação" no ecrã principal.
+                </div>
+                <div class="step-box">
+                    <b>3. AS NOMEAÇÕES</b><br>
+                    De 4 em 4 dias (rondas), a casa vota. Se fores o mais votado, és expulso e passas a ser apenas espectador!
+                </div>
             </div>
+
+            <input type="text" id="room-id" placeholder="CÓDIGO DA SALA (ex: casa1)">
+            <input type="text" id="my-name" placeholder="TEU NOME OU PERSONAGEM">
+            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
         </div>
     </div>
 
     <div id="game-room" style="display:none;" class="main-container">
         <div class="side-panel">
-            <h3>📜 MANUAL RP</h3>
+            <h3>📖 GUIA DE RP</h3>
             <p style="font-size: 0.85em;">
-                <b>1. Atuação:</b> Tenta ser fiel à tua personagem.<br><br>
-                <b>2. Popularidade:</b> As tuas ações de RP mudam o teu % automático, mas o público (outros jogadores) é quem decide nas nomeações.<br><br>
-                <b>3. Turnos:</b> Espera pela tua vez para atuar no ecrã principal.
+                <b>Turnos:</b> Espera que o teu nome fique brilhante.<br><br>
+                <b>Atuações:</b> Escreve coisas que gerem conversa ou polémicas.<br><br>
+                <b>Pop:</b> O teu % sobe com boas ações, mas as nomeações são o que conta!<br><br>
+                <b>Votos:</b> Escolhe quem queres fora da casa no 4º dia.
             </p>
         </div>
 
         <div class="game-panel">
             <div id="day-counter" style="font-weight: 900; font-size: 1.5em; color: var(--pop-pink);">DIA 1</div>
             
+            <p style="font-size: 0.8em; font-weight: 800; margin-top: 5px;">🎥 EM DIRETO DA CASA:</p>
             <div class="rp-display" id="last-rp-action">
                 "A VOZ: A emissão começou. Aguardamos a primeira atuação..."
             </div>
             
             <div id="players-grid" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;"></div>
 
-            <div id="controls" style="display:none; background: #f0f0f0; padding: 15px; border-radius: 20px; border: 2px solid var(--dark);">
+            <div id="controls" style="display:none; background: #f9f9f9; padding: 20px; border-radius: 20px; border: 2px solid var(--dark);">
                 <div id="normal-actions">
-                    <label><b>O QUE VAIS FAZER?</b></label>
-                    <select id="rp-type">
-                        <option value="amizade">🤝 Criar Aliança (Pop+)</option>
-                        <option value="confronto">🔥 Confrontar Alguém (Pop-)</option>
-                        <option value="desabafo">😢 Desabafo no Confessionário (Pop+)</option>
-                        <option value="festa">🎉 Dar Show na Festa (Pop+)</option>
+                    <label><b>O QUE ESTÁ A TUA PERSONAGEM A FAZER?</b></label>
+                    <select id="rp-type" style="margin-top: 10px;">
+                        <option value="amizade">🤝 Conversar / Criar Aliança</option>
+                        <option value="confronto">🔥 Confrontar / Criar Treta</option>
+                        <option value="desabafo">😢 Confessionário / Desabafo</option>
+                        <option value="festa">🎉 Festa / Divertir-se</option>
                     </select>
-                    <textarea id="rp-text" placeholder="Escreve aqui a tua ação... (ex: 'Fui à cozinha e confrontei o João sobre a loiça suja!')" rows="3"></textarea>
-                    <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR ATUAÇÃO 🎬</button>
+                    <textarea id="rp-text" placeholder="Ex: Entrei na cozinha e comecei a discutir com toda a gente por causa do café..." rows="3"></textarea>
+                    <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR AÇÃO 🎬</button>
                 </div>
 
                 <div id="nomination-actions" style="display:none;">
-                    <p style="color: red; font-weight: 800;">HORA DAS NOMEAÇÕES!</p>
-                    <p style="font-size: 0.8em;">Baseia-te no RP dos teus colegas:</p>
+                    <p style="color: red; font-weight: 800;">🔴 HORA DAS NOMEAÇÕES!</p>
+                    <p style="font-size: 0.8em;">Quem merece sair hoje?</p>
                     <div id="vote-targets"></div>
                 </div>
             </div>
         </div>
 
         <div class="side-panel">
-            <h3>💬 CHAT OFF-RP</h3>
+            <h3>💬 CHAT (OFF-RP)</h3>
             <div id="chat-box" class="chat-box"></div>
-            <input type="text" id="chat-input" placeholder="Falar fora da personagem...">
+            <input type="text" id="chat-input" placeholder="Fala aqui com os amigos...">
             <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendChat()">ENVIAR</button>
         </div>
     </div>
 
 <script>
+    // USANDO AS TUAS CHAVES
     const firebaseConfig = {
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
@@ -116,7 +129,7 @@
     function joinRoom() {
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         myName = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !myName) return;
+        if(!currentRoom || !myName) return alert("Preenche os campos!");
         myId = myName + "_" + Math.floor(Math.random()*1000);
         
         db.ref('rooms/' + currentRoom + '/day').transaction(d => d || 1);
@@ -171,7 +184,7 @@
     function sendRP() {
         const type = document.getElementById('rp-type').value;
         const text = document.getElementById('rp-text').value.trim();
-        if(!text) return alert("Escreve a tua ação de RP!");
+        if(!text) return alert("Escreve o que a tua personagem está a fazer!");
 
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
@@ -187,7 +200,8 @@
             }
 
             let popChange = (type === 'confronto') ? -15 : 10;
-            let formattedRP = `<b>🎬 ${myName}:</b> "${text}"`;
+            let icon = (type === 'confronto') ? '🔥' : (type === 'amizade') ? '🤝' : (type === 'desabafo') ? '😢' : '🎉';
+            let formattedRP = `<span>${icon} <b>${myName}:</b> "${text}"</span>`;
 
             let updates = {};
             updates['/players/' + myId + '/pop'] = data.players[myId].pop + popChange;
@@ -197,7 +211,7 @@
             updates['/lastRP'] = formattedRP;
             
             db.ref('rooms/' + currentRoom).update(updates);
-            document.getElementById('rp-text').value = ""; // Limpa o texto
+            document.getElementById('rp-text').value = "";
         });
     }
 
@@ -211,9 +225,10 @@
             let updates = {};
             updates[`/players/${tid}/votes`] = (data.players[tid].votes || 0) + 1;
             if(isLast) {
+                // Quem tiver mais votos sai
                 updates['/players/' + tid + '/status'] = 'eliminated';
                 updates['/phase'] = 'normal';
-                updates['/lastRP'] = `<b style="color:red">👁️ A VOZ: ${data.players[tid].name} foi o mais votado e abandona a casa!</b>`;
+                updates['/lastRP'] = `<b style="color:red">👁️ A VOZ: ${data.players[tid].name} foi expulso pelo voto dos colegas!</b>`;
                 aliveIds.forEach(id => updates[`/players/${id}/votes`] = 0);
             }
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
@@ -221,7 +236,6 @@
         });
     }
 
-    // CHAT E LISTENCHAT IGUAIS AO ANTERIOR
     function sendChat() {
         const input = document.getElementById('chat-input');
         if(!input.value) return;
@@ -233,8 +247,8 @@
         db.ref('rooms/' + currentRoom + '/chat').limitToLast(15).on('value', snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(child => {
-                const data = child.val();
-                box.innerHTML += `<div class="chat-msg"><b>${data.name}:</b> ${data.msg}</div>`;
+                const d = child.val();
+                box.innerHTML += `<div class="chat-msg"><b>${d.name}:</b> ${d.msg}</div>`;
             });
             box.scrollTop = box.scrollHeight;
         });
