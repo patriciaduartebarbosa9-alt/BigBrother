@@ -2,7 +2,7 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <title>Duelo de Citações 👁️</title>
+    <title>Duelo de Citações 100 PTS 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
@@ -11,21 +11,16 @@
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
         body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); overflow-x: hidden; }
         
-        /* Layout de 3 Colunas */
         .main-layout { display: grid; grid-template-columns: 250px 1fr 300px; gap: 15px; padding: 15px; max-width: 1400px; margin: 0 auto; height: 95vh; box-sizing: border-box; }
-        
         .panel { background: white; border: 4px solid var(--dark); border-radius: 20px; box-shadow: 6px 6px 0 var(--dark); display: flex; flex-direction: column; overflow: hidden; }
         .panel-header { background: var(--dark); color: white; padding: 10px; font-weight: 800; text-align: center; text-transform: uppercase; font-size: 0.9em; }
         
         .game-panel { padding: 20px; text-align: center; overflow-y: auto; }
-        
         .logo { font-family: 'Montserrat'; font-size: 1.8em; -webkit-text-stroke: 1px var(--dark); color: white; filter: drop-shadow(3px 3px 0 var(--pop-pink)); margin-bottom: 15px; text-transform: uppercase; }
         
-        /* Jogadores e Pontos */
         .player-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #eee; font-weight: 700; }
         .player-item span { color: var(--pop-pink); }
 
-        /* Botões e Inputs */
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
@@ -35,75 +30,63 @@
         canvas { background: #fff; border: 3px solid var(--dark); border-radius: 15px; cursor: crosshair; touch-action: none; max-width: 100%; }
         
         .chat-container { flex-grow: 1; padding: 10px; overflow-y: auto; font-size: 0.9em; background: #fafafa; }
-        .status-msg { background: #fff3cd; border: 2px dashed var(--dark); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: 700; font-size: 0.8em; }
+        .status-msg { background: #fff3cd; border: 2px dashed var(--dark); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: 700; }
         
         .vote-card { border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin-top: 15px; background: #fdfdfd; }
         .vote-card img { width: 100%; border-radius: 8px; border: 2px solid var(--dark); }
 
         input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; box-sizing: border-box; }
-        
-        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; height: auto; } }
     </style>
 </head>
 <body>
 
 <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
     <div class="panel" style="max-width: 400px; padding: 30px; text-align: center;">
-        <div class="logo">DUELO CITAÇÕES</div>
+        <div class="logo">DUELO 100 PTS</div>
         <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
         <input type="text" id="my-name" placeholder="TEU NOME">
-        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NO DUELO 👁️</button>
+        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NO DUELO</button>
     </div>
 </div>
 
 <div id="game-area" class="main-layout" style="display:none;">
     
     <div class="panel">
-        <div class="panel-header">👥 JOGADORES & PONTOS</div>
+        <div class="panel-header">PLACAR (ALVO: 100)</div>
         <div id="players-list" style="overflow-y: auto;"></div>
     </div>
 
     <div class="panel game-panel">
-        <div id="status" class="status-msg">Aguardando início...</div>
+        <div id="status" class="status-msg">Iniciando...</div>
         
         <div id="phase-write" style="display:none;">
             <h3>✍️ Escreve uma citação:</h3>
-            <textarea id="phrase-input" placeholder="Ex: Um gato azul a tocar guitarra..." rows="3"></textarea>
+            <textarea id="phrase-input" placeholder="O que devem desenhar?"></textarea>
             <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitPhrase()">ENVIAR FRASE</button>
         </div>
 
         <div id="phase-draw" style="display:none;">
-            <p>DESENHA ESTA CITAÇÃO:</p>
+            <p>DESENHA:</p>
             <div id="target-phrase" style="font-size: 1.3em; font-weight: 900; color: var(--pop-pink); margin-bottom: 10px;"></div>
-            
-            <div class="color-picker">
-                <div class="color-btn" style="background: #000000" onclick="changeColor('#000000')"></div>
-                <div class="color-btn" style="background: #ff7675" onclick="changeColor('#ff7675')"></div>
-                <div class="color-btn" style="background: #74b9ff" onclick="changeColor('#74b9ff')"></div>
-                <div class="color-btn" style="background: #55efc4" onclick="changeColor('#55efc4')"></div>
-                <div class="color-btn" style="background: #a29bfe" onclick="changeColor('#a29bfe')"></div>
-            </div>
-
+            <div class="color-picker" id="colors"></div>
             <canvas id="paintCanvas" width="350" height="300"></canvas>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
-                <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitDrawing()">ENVIAR OBRA</button>
-            </div>
+            <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
+            <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitDrawing()">ENVIAR DESENHO</button>
         </div>
 
         <div id="phase-vote" style="display:none;">
-            <h3>⭐ VOTA NO MELHOR DESENHO</h3>
+            <h3>⭐ VOTA NO MELHOR (1 Voto = 1 Ponto)</h3>
             <div id="vote-gallery"></div>
         </div>
 
         <div id="phase-results" style="display:none;">
-            <h2 id="winner-text">🏆 RESULTADOS</h2>
-            <button class="btn-pop" onclick="location.reload()">REINICIAR</button>
+            <h2 id="winner-text" style="color:var(--pop-pink)">🏆 TEMOS UM VENCEDOR!</h2>
+            <button class="btn-pop" onclick="location.reload()">SAIR</button>
         </div>
     </div>
 
     <div class="panel">
-        <div class="panel-header">💬 CHAT OFF</div>
+        <div class="panel-header">CHAT OFF</div>
         <div id="chat-box" class="chat-container"></div>
         <div style="padding: 10px; border-top: 2px solid #eee;">
             <input type="text" id="chat-input" placeholder="Conversar...">
@@ -129,7 +112,6 @@
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         myName = document.getElementById('my-name').value.trim();
         if(!currentRoom || !myName) return alert("Preenche os dados!");
-        
         myId = myName.replace(/\s+/g, '_') + "_" + Math.floor(Math.random()*1000);
         
         db.ref('duelo/'+currentRoom+'/players/'+myId).set({ name: myName, score: 0 });
@@ -138,8 +120,21 @@
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-area').style.display = 'grid';
         initCanvas();
+        initColors();
         listen();
         listenChat();
+    }
+
+    function initColors() {
+        const colors = ["#000000", "#ff7675", "#74b9ff", "#55efc4", "#a29bfe"];
+        const container = document.getElementById('colors');
+        colors.forEach(c => {
+            const btn = document.createElement('div');
+            btn.className = 'color-btn';
+            btn.style.background = c;
+            btn.onclick = () => currentColor = c;
+            container.appendChild(btn);
+        });
     }
 
     function initCanvas() {
@@ -157,25 +152,100 @@
         window.addEventListener('mouseup', () => drawing = false);
     }
 
-    function changeColor(c) { currentColor = c; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
     function submitPhrase() {
         const p = document.getElementById('phrase-input').value.trim();
         if(!p) return;
         db.ref('duelo/'+currentRoom+'/phrases/'+myId).set(p);
-        document.getElementById('phase-write').style.display = 'none';
+        document.getElementById('phrase-input').value = "";
     }
 
     function submitDrawing() {
         const data = canvas.toDataURL();
         db.ref('duelo/'+currentRoom+'/drawings/'+myId).set(data);
-        document.getElementById('phase-draw').style.display = 'none';
+        clearCanvas();
     }
 
     function vote(id) {
+        // 1 voto = 1 ponto
         db.ref('duelo/'+currentRoom+'/players/'+id+'/score').transaction(s => (s||0)+1);
         db.ref('duelo/'+currentRoom+'/votes/'+myId).set(true);
+    }
+
+    function listen() {
+        db.ref('duelo/'+currentRoom).on('value', snap => {
+            const data = snap.val() || {};
+            const players = data.players || {};
+            const pIds = Object.keys(players);
+            const numP = pIds.length;
+            if(numP < 1) return;
+
+            // Atualizar lista esquerda
+            const list = document.getElementById('players-list');
+            list.innerHTML = "";
+            let winnerFound = false;
+            pIds.forEach(id => {
+                const pts = players[id].score || 0;
+                list.innerHTML += `<div class="player-item">${players[id].name} <span>${pts} PTS</span></div>`;
+                if(pts >= 100) { winnerFound = true; document.getElementById('winner-text').innerText = "🏆 " + players[id].name + " CHEGOU AOS 100!"; }
+            });
+
+            if(winnerFound) {
+                document.getElementById('phase-write').style.display = 'none';
+                document.getElementById('phase-draw').style.display = 'none';
+                document.getElementById('phase-vote').style.display = 'none';
+                document.getElementById('phase-results').style.display = 'block';
+                return;
+            }
+
+            const phrases = data.phrases || {};
+            const drawings = data.drawings || {};
+            const votes = data.votes || {};
+
+            // Lógica de Reinício de Turno (Loop)
+            if (Object.keys(votes).length >= numP && numP > 0) {
+                // Todos votaram, limpa para o próximo turno mas mantém os pontos
+                if (myId === pIds[0]) { // Apenas um jogador limpa para evitar conflitos
+                    setTimeout(() => {
+                        db.ref('duelo/'+currentRoom+'/phrases').remove();
+                        db.ref('duelo/'+currentRoom+'/drawings').remove();
+                        db.ref('duelo/'+currentRoom+'/votes').remove();
+                    }, 2000);
+                }
+                document.getElementById('status').innerText = "Turno finalizado! A preparar o próximo...";
+                return;
+            }
+
+            // Controle de Fases
+            if(Object.keys(phrases).length < numP) {
+                document.getElementById('status').innerText = "FASE: ESCREVER CITAÇÃO";
+                document.getElementById('phase-write').style.display = 'block';
+                document.getElementById('phase-draw').style.display = 'none';
+                document.getElementById('phase-vote').style.display = 'none';
+            } 
+            else if(Object.keys(drawings).length < numP) {
+                document.getElementById('status').innerText = "FASE: DESENHAR O RIVAL";
+                document.getElementById('phase-write').style.display = 'none';
+                document.getElementById('phase-draw').style.display = 'block';
+                const myIdx = pIds.indexOf(myId);
+                const targetIdx = (myIdx + 1) % numP;
+                document.getElementById('target-phrase').innerText = phrases[pIds[targetIdx]];
+            }
+            else {
+                document.getElementById('status').innerText = "FASE: VOTAÇÃO";
+                document.getElementById('phase-draw').style.display = 'none';
+                document.getElementById('phase-vote').style.display = 'block';
+                const gal = document.getElementById('vote-gallery');
+                gal.innerHTML = "";
+                Object.keys(drawings).forEach(pid => {
+                    if(pid !== myId && !votes[myId]) {
+                        gal.innerHTML += `<div class="vote-card"><p>Obra de: ${players[pid].name}</p><img src="${drawings[pid]}"><button class="btn-pop" onclick="vote('${pid}')">VOTAR ⭐</button></div>`;
+                    }
+                });
+                if(votes[myId]) gal.innerHTML = "<p>Já votaste! Aguarda os outros...</p>";
+            }
+        });
     }
 
     function sendChat() {
@@ -187,61 +257,9 @@
 
     function listenChat() {
         db.ref('duelo/'+currentRoom+'/chat').limitToLast(20).on('value', snap => {
-            const box = document.getElementById('chat-box');
-            box.innerHTML = "";
+            const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(c => { box.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`; });
             box.scrollTop = box.scrollHeight;
-        });
-    }
-
-    function listen() {
-        db.ref('duelo/'+currentRoom).on('value', snap => {
-            const data = snap.val() || {};
-            const players = data.players || {};
-            const pIds = Object.keys(players);
-            const numP = pIds.length;
-            const phrases = data.phrases || {};
-            const drawings = data.drawings || {};
-            const votes = data.votes || {};
-
-            // Atualiza Lista de Jogadores na Esquerda
-            const list = document.getElementById('players-list');
-            list.innerHTML = "";
-            pIds.forEach(id => {
-                list.innerHTML += `<div class="player-item">${players[id].name} <span>⭐ ${players[id].score || 0}</span></div>`;
-            });
-
-            // Lógica de Fases
-            if(Object.keys(phrases).length < numP) {
-                document.getElementById('status').innerText = "FASE 1: ESCREVER CITAÇÕES";
-                document.getElementById('phase-write').style.display = 'block';
-            } 
-            else if(Object.keys(drawings).length < numP) {
-                document.getElementById('status').innerText = "FASE 2: DESENHAR O RIVAL";
-                document.getElementById('phase-write').style.display = 'none';
-                document.getElementById('phase-draw').style.display = 'block';
-                const myIdx = pIds.indexOf(myId);
-                const targetIdx = (myIdx + 1) % numP;
-                document.getElementById('target-phrase').innerText = phrases[pIds[targetIdx]];
-            }
-            else if(Object.keys(votes).length < numP) {
-                document.getElementById('status').innerText = "FASE 3: VOTAÇÃO";
-                document.getElementById('phase-draw').style.display = 'none';
-                document.getElementById('phase-vote').style.display = 'block';
-                const gal = document.getElementById('vote-gallery');
-                gal.innerHTML = "";
-                Object.keys(drawings).forEach(pid => {
-                    if(pid !== myId) {
-                        gal.innerHTML += `<div class="vote-card"><p>Obra de: ${players[pid].name}</p><img src="${drawings[pid]}"><button class="btn-pop" onclick="vote('${pid}')">VOTAR ⭐</button></div>`;
-                    }
-                });
-            } else {
-                document.getElementById('phase-vote').style.display = 'none';
-                document.getElementById('phase-results').style.display = 'block';
-                let win = ""; let max = -1;
-                pIds.forEach(id => { if(players[id].score > max) { max = players[id].score; win = players[id].name; }});
-                document.getElementById('winner-text').innerText = `🏆 ${win} VENCEU!`;
-            }
         });
     }
 </script>
