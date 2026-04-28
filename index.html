@@ -10,6 +10,11 @@
     <style>
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
         body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
+
+        #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; }
+canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-action: none; }
+.drawing-card { border: 2px solid var(--dark); margin: 5px; padding: 5px; border-radius: 10px; display: inline-block; }
+.drawing-card img { width: 150px; height: 150px; display: block; border-radius: 5px; }
         
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
         .side-panel { background: white; padding: 20px; border-radius: 20px; border: 4px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); flex: 1; min-width: 250px; height: fit-content; }
@@ -81,6 +86,19 @@
             
             <div id="players-grid" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;"></div>
 
+            <div id="drawing-zone" style="display:none;">
+    <h3>🎨 CONFESSIONÁRIO: DESENHA O TEU DIA!</h3>
+    <div id="canvas-container">
+        <canvas id="paintCanvas" width="250" height="250"></canvas>
+    </div>
+    <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
+    <button class="btn-pop" style="background:var(--pop-teal); color:white;" onclick="saveDrawing()">ENVIAR DESENHO</button>
+</div>
+
+<div id="gallery-zone" style="display:none;">
+    <h3>🖼️ GALERIA: VOTA NO MELHOR DESENHO!</h3>
+    <div id="drawings-display"></div>
+</div>
             <div id="controls" style="display:none; background: #f9f9f9; padding: 20px; border-radius: 20px; border: 2px solid var(--dark);">
                 <div id="normal-actions">
                     <label><b>O QUE ESTÁ A TUA PERSONAGEM A FAZER?</b></label>
@@ -101,6 +119,8 @@
                 </div>
             </div>
         </div>
+
+        
 
         <div class="side-panel">
             <h3>💬 CHAT (OFF-RP)</h3>
@@ -141,13 +161,38 @@
         listenChat();
     }
 
+    let canvas, ctx, drawing = false;
+
+    // Inicializa o Canvas após carregar a página
+    window.onload = () => {
+        canvas = document.getElementById('paintCanvas');
+        if(canvas) {
+            ctx = canvas.getContext('2d');
+            canvas.onmousedown = () => drawing = true;
+            canvas.onmouseup = () => { drawing = false; ctx.beginPath(); };
+            canvas.onmousemove = (e) => {
+                if(!drawing) return;
+                ctx.lineWidth = 5; ctx.lineCap = "round";
+                ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+            };
+        }
+    };
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    function saveDrawing() {
+        const dataURL = canvas.toDataURL();
+        db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
+            sendRP("Desenhei algo incrível no confessionário! 🎨");
+        });
+    }
+
     function listen() {
         db.ref('rooms/' + currentRoom).on('value', (snap) => {
             const data = snap.val();
             if(!data || !data.players) return;
             const players = data.players;
-            const ids = Object.keys(players);
-            const aliveIds = ids.filter(id => players[id].status === 'playing');
+            const aliveIds = Object.keys(players).filter(id => players[id].status === 'playing');
             const day = data.day || 1;
             const turn = data.turn || aliveIds[0];
             const phase = data.phase || 'normal';
@@ -155,32 +200,71 @@
             document.getElementById('day-counter').innerText = `DIA ${day}`;
             if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
 
+            // Mostrar/Esconder zonas conforme o Dia
+            document.getElementById('drawing-zone').style.display = (day === 2 && turn === myId) ? 'block' : 'none';
+            document.getElementById('gallery-zone').style.display = (day === 3) ? 'block' : 'none';
+            document.getElementById('normal-actions').style.display = (day !== 2 && day !== 3 && phase !== 'nomination') ? 'block' : 'none';
+
+            // Lógica da Galeria (Dia 3)
+            if(day === 3 && data.drawings) {
+                const gallery = document.getElementById('drawings-display');
+                gallery.innerHTML = "";
+                Object.keys(data.drawings).forEach(pid => {
+                    if(pid !== myId) {
+                        gallery.innerHTML += `
+                            <div class="drawing-card">
+                                <img src="${data.drawings[pid]}">
+                                <button class="btn-pop" style="font-size:10px" onclick="voteDrawing('${pid}')">VOTAR</button>
+                            </div>`;
+                    }
+                });
+            }
+
+            // Grid de Jogadores (com ícone de Imunidade)
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
-            ids.forEach(id => {
+            Object.keys(players).forEach(id => {
                 const p = players[id];
-                grid.innerHTML += `<div class="card ${id === turn ? 'active' : ''} ${p.status === 'eliminated' ? 'eliminated' : ''}"><b>${p.name}</b><br>${p.pop}%</div>`;
+                const isImmune = p.immune ? "🛡️" : "";
+                grid.innerHTML += `<div class="card ${id === turn ? 'active' : ''} ${p.status === 'eliminated' ? 'eliminated' : ''}">
+                    <b>${p.name}</b> ${isImmune}<br>${p.pop}%
+                </div>`;
             });
 
+            // Controlos de Turno
             const isEliminated = players[myId].status === 'eliminated';
-            if(!isEliminated && turn === myId) {
-                document.getElementById('controls').style.display = 'block';
-                if(phase === 'nomination') {
-                    document.getElementById('normal-actions').style.display = 'none';
-                    document.getElementById('nomination-actions').style.display = 'block';
-                    const targets = document.getElementById('vote-targets');
-                    targets.innerHTML = "";
-                    aliveIds.forEach(tid => { if(tid !== myId) targets.innerHTML += `<button class="btn-pop" onclick="vote('${tid}')">Votar em ${players[tid].name}</button>`; });
-                } else {
-                    document.getElementById('normal-actions').style.display = 'block';
-                    document.getElementById('nomination-actions').style.display = 'none';
-                }
+            document.getElementById('controls').style.display = (!isEliminated && turn === myId) ? 'block' : 'none';
+            
+            if(phase === 'nomination') {
+                document.getElementById('nomination-actions').style.display = 'block';
+                const vTargets = document.getElementById('vote-targets');
+                vTargets.innerHTML = "";
+                aliveIds.forEach(tid => {
+                    if(tid !== myId && !players[tid].immune) {
+                        vTargets.innerHTML += `<button class="btn-pop" onclick="vote('${tid}')">Votar em ${players[tid].name}</button>`;
+                    }
+                });
             } else {
-                document.getElementById('controls').style.display = 'none';
+                document.getElementById('nomination-actions').style.display = 'none';
             }
         });
     }
 
+    function voteDrawing(pid) {
+        db.ref('rooms/' + currentRoom + '/drawingVotes/' + pid).transaction(v => (v || 0) + 1);
+        sendRP("Votei no desenho que mais gostei! 🖼️");
+    }
+
+    // Na função vote(), quando o dia 3 acaba, calculamos o vencedor da imunidade
+    // Mas para simplificar, no sendRP() quando o dia passa de 3 para 4:
+    function checkWinner(data) {
+        const votes = data.drawingVotes || {};
+        let winner = null; let max = -1;
+        Object.keys(votes).forEach(id => {
+            if(votes[id] > max) { max = votes[id]; winner = id; }
+        });
+        return winner;
+    }
   function sendRP() {
         const text = document.getElementById('rp-text').value.trim();
         if(!text) return alert("Escreve a tua ação!");
