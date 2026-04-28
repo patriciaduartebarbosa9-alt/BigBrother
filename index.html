@@ -2,7 +2,7 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <title>BBB Term-O Portugal 👁️</title>
+    <title>BB RP Portugal 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
@@ -11,78 +11,89 @@
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
         body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
         
-        /* Layout */
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
         .side-panel { background: white; padding: 20px; border-radius: 20px; border: 4px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); flex: 1; min-width: 250px; height: fit-content; }
         .game-panel { flex: 2; min-width: 350px; background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; }
 
-        /* Estilo Componentes */
         .logo { font-family: 'Montserrat'; font-size: 2.2em; -webkit-text-stroke: 1.5px var(--dark); color: white; filter: drop-shadow(3px 3px 0 var(--pop-pink)); margin-bottom: 15px; text-transform: uppercase; }
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
-        .chat-box { height: 300px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
-        .chat-msg { margin-bottom: 5px; padding: 5px; border-bottom: 1px solid #eee; }
+        .chat-box { height: 350px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
+        .chat-msg { margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee; }
 
-        .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 80px; text-align: center; }
-        .card.active { border-color: var(--pop-pink); background: white; transform: scale(1.1); }
+        .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 85px; text-align: center; }
+        .card.active { border-color: var(--pop-pink); background: white; transform: scale(1.1); box-shadow: 0 0 15px var(--pop-pink); }
         .card.eliminated { background: #636e72 !important; opacity: 0.5; filter: grayscale(1); }
 
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; box-sizing: border-box; font-family: 'Outfit'; }
+        
+        /* Destaque para a ação de RP */
+        .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 15px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div id="lobby" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
         <div class="game-panel" style="max-width: 400px;">
-            <div class="logo">BBB TERMO</div>
-            <p><b>BEM-VINDO À CASA!</b></p>
+            <div class="logo">BBB RP PORTUGAL</div>
+            <p><b>CRIE A SUA PERSONAGEM!</b></p>
             <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
-            <input type="text" id="my-name" placeholder="TEU NOME">
-            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR 👁️</button>
+            <input type="text" id="my-name" placeholder="TEU NOME (ex: Tiago Brunet)">
+            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
             <div style="text-align: left; font-size: 0.8em; margin-top: 20px; background: #eee; padding: 10px; border-radius: 10px;">
-                <b>REGRAS:</b><br>
-                • Joga com amigos na mesma sala.<br>
-                • De 4 em 4 dias há <b>NOMEAÇÕES</b>.<br>
-                • Quem for expulso vira espectador.<br>
-                • Se restarem 2, é a Grande Final!
+                <b>COMO FUNCIONA O RP:</b><br>
+                • No teu turno, escolhes uma ação de Roleplay.<br>
+                • Escreve o que a tua personagem está a fazer ou dizer.<br>
+                • De 4 em 4 dias, os jogadores votam baseados no comportamento!
             </div>
         </div>
     </div>
 
     <div id="game-room" style="display:none;" class="main-container">
         <div class="side-panel">
-            <h3>📜 REGRAS</h3>
+            <h3>📜 MANUAL RP</h3>
             <p style="font-size: 0.85em;">
-                <b>Conversar:</b> Ganhas +10% de Pop.<br><br>
-                <b>Treta:</b> Perdes -15% de Pop, mas agitas a casa!<br><br>
-                <b>Nomeações:</b> A cada 4 dias. O mais votado sai.<br><br>
-                <b>Final:</b> Se houver apenas 2, o duelo é pela vitória!
+                <b>1. Atuação:</b> Tenta ser fiel à tua personagem.<br><br>
+                <b>2. Popularidade:</b> As tuas ações de RP mudam o teu % automático, mas o público (outros jogadores) é quem decide nas nomeações.<br><br>
+                <b>3. Turnos:</b> Espera pela tua vez para atuar no ecrã principal.
             </p>
         </div>
 
         <div class="game-panel">
             <div id="day-counter" style="font-weight: 900; font-size: 1.5em; color: var(--pop-pink);">DIA 1</div>
-            <div id="host-msg" style="background: var(--dark); color: white; padding: 15px; border-radius: 15px; margin: 15px 0;">"A VOZ: Olá Portugal!"</div>
+            
+            <div class="rp-display" id="last-rp-action">
+                "A VOZ: A emissão começou. Aguardamos a primeira atuação..."
+            </div>
             
             <div id="players-grid" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;"></div>
 
-            <div id="controls" style="display:none;">
+            <div id="controls" style="display:none; background: #f0f0f0; padding: 15px; border-radius: 20px; border: 2px solid var(--dark);">
                 <div id="normal-actions">
-                    <button class="btn-pop" onclick="sendAction('conversar')">💬 CONVERSAR (+10%)</button>
-                    <button class="btn-pop" style="background: var(--pop-teal);" onclick="sendAction('treta')">🔥 TRETA (-15%)</button>
+                    <label><b>O QUE VAIS FAZER?</b></label>
+                    <select id="rp-type">
+                        <option value="amizade">🤝 Criar Aliança (Pop+)</option>
+                        <option value="confronto">🔥 Confrontar Alguém (Pop-)</option>
+                        <option value="desabafo">😢 Desabafo no Confessionário (Pop+)</option>
+                        <option value="festa">🎉 Dar Show na Festa (Pop+)</option>
+                    </select>
+                    <textarea id="rp-text" placeholder="Escreve aqui a tua ação... (ex: 'Fui à cozinha e confrontei o João sobre a loiça suja!')" rows="3"></textarea>
+                    <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR ATUAÇÃO 🎬</button>
                 </div>
+
                 <div id="nomination-actions" style="display:none;">
-                    <p style="color: red; font-weight: 800;">NOMEAÇÕES EM CURSO!</p>
+                    <p style="color: red; font-weight: 800;">HORA DAS NOMEAÇÕES!</p>
+                    <p style="font-size: 0.8em;">Baseia-te no RP dos teus colegas:</p>
                     <div id="vote-targets"></div>
                 </div>
             </div>
         </div>
 
         <div class="side-panel">
-            <h3>💬 CHAT DA CASA</h3>
+            <h3>💬 CHAT OFF-RP</h3>
             <div id="chat-box" class="chat-box"></div>
-            <input type="text" id="chat-input" placeholder="Escreve algo...">
+            <input type="text" id="chat-input" placeholder="Falar fora da personagem...">
             <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendChat()">ENVIAR</button>
         </div>
     </div>
@@ -108,11 +119,7 @@
         if(!currentRoom || !myName) return;
         myId = myName + "_" + Math.floor(Math.random()*1000);
         
-        // Garante que o dia 1 existe
-        db.ref('rooms/' + currentRoom).update({ initialized: true }).then(() => {
-            db.ref('rooms/' + currentRoom + '/day').transaction(d => d || 1);
-        });
-
+        db.ref('rooms/' + currentRoom + '/day').transaction(d => d || 1);
         db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: myName, pop: 50, status: 'playing', votes: 0 });
         
         document.getElementById('lobby').style.display = 'none';
@@ -133,7 +140,7 @@
             const phase = data.phase || 'normal';
 
             document.getElementById('day-counter').innerText = `DIA ${day}`;
-            document.getElementById('host-msg').innerText = data.lastMsg || "A VOZ está a observar...";
+            if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
 
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
@@ -150,7 +157,7 @@
                     document.getElementById('nomination-actions').style.display = 'block';
                     const targets = document.getElementById('vote-targets');
                     targets.innerHTML = "";
-                    aliveIds.forEach(tid => { if(tid !== myId) targets.innerHTML += `<button class="btn-pop" style="font-size:0.7em" onclick="vote('${tid}')">Votar em ${players[tid].name}</button>`; });
+                    aliveIds.forEach(tid => { if(tid !== myId) targets.innerHTML += `<button class="btn-pop" onclick="vote('${tid}')">Votar em ${players[tid].name}</button>`; });
                 } else {
                     document.getElementById('normal-actions').style.display = 'block';
                     document.getElementById('nomination-actions').style.display = 'none';
@@ -161,7 +168,11 @@
         });
     }
 
-    function sendAction(act) {
+    function sendRP() {
+        const type = document.getElementById('rp-type').value;
+        const text = document.getElementById('rp-text').value.trim();
+        if(!text) return alert("Escreve a tua ação de RP!");
+
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
             const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
@@ -175,13 +186,18 @@
                 if(newDay % 4 === 0 && aliveIds.length > 2) nextPhase = 'nomination';
             }
 
+            let popChange = (type === 'confronto') ? -15 : 10;
+            let formattedRP = `<b>🎬 ${myName}:</b> "${text}"`;
+
             let updates = {};
-            updates['/players/' + myId + '/pop'] = data.players[myId].pop + (act === 'conversar' ? 10 : -15);
+            updates['/players/' + myId + '/pop'] = data.players[myId].pop + popChange;
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
             updates['/day'] = newDay;
             updates['/phase'] = nextPhase;
-            updates['/lastMsg'] = act === 'conversar' ? `"${myName} está a socializar."` : `"Houve barraco! ${myName} causou!"`;
+            updates['/lastRP'] = formattedRP;
+            
             db.ref('rooms/' + currentRoom).update(updates);
+            document.getElementById('rp-text').value = ""; // Limpa o texto
         });
     }
 
@@ -195,10 +211,9 @@
             let updates = {};
             updates[`/players/${tid}/votes`] = (data.players[tid].votes || 0) + 1;
             if(isLast) {
-                let victim = tid; // Logica simplificada: o ultimo a receber voto sai neste teste
-                updates['/players/' + victim + '/status'] = 'eliminated';
+                updates['/players/' + tid + '/status'] = 'eliminated';
                 updates['/phase'] = 'normal';
-                updates['/lastMsg'] = `A VOZ: ${data.players[victim].name} FOI EXPULSO!`;
+                updates['/lastRP'] = `<b style="color:red">👁️ A VOZ: ${data.players[tid].name} foi o mais votado e abandona a casa!</b>`;
                 aliveIds.forEach(id => updates[`/players/${id}/votes`] = 0);
             }
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
@@ -206,6 +221,7 @@
         });
     }
 
+    // CHAT E LISTENCHAT IGUAIS AO ANTERIOR
     function sendChat() {
         const input = document.getElementById('chat-input');
         if(!input.value) return;
@@ -214,9 +230,8 @@
     }
 
     function listenChat() {
-        db.ref('rooms/' + currentRoom + '/chat').limitToLast(10).on('value', snap => {
-            const box = document.getElementById('chat-box');
-            box.innerHTML = "";
+        db.ref('rooms/' + currentRoom + '/chat').limitToLast(15).on('value', snap => {
+            const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(child => {
                 const data = child.val();
                 box.innerHTML += `<div class="chat-msg"><b>${data.name}:</b> ${data.msg}</div>`;
