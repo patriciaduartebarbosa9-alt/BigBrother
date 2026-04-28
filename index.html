@@ -126,6 +126,13 @@
         listen();
     }
 
+    // Limpa o jogador da base de dados quando ele fecha a aba ou sai da página
+window.addEventListener('beforeunload', function() {
+    if (currentRoom && myId) {
+        db.ref('rooms/' + currentRoom + '/players/' + myId).remove();
+    }
+});
+
     function listen() {
         db.ref('rooms/' + currentRoom).on('value', (snap) => {
             const data = snap.val();
