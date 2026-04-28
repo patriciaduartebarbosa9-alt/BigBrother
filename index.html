@@ -181,39 +181,46 @@
         });
     }
 
-    function sendRP() {
-        const type = document.getElementById('rp-type').value;
-        const text = document.getElementById('rp-text').value.trim();
-        if(!text) return alert("Escreve o que a tua personagem está a fazer!");
+   function sendRP() {
+    const type = document.getElementById('rp-type').value;
+    const text = document.getElementById('rp-text').value.trim();
+    if(!text) return alert("Escreve o que a tua personagem está a fazer!");
 
-        db.ref('rooms/' + currentRoom).get().then(snap => {
-            const data = snap.val();
-            const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
-            const currentIndex = aliveIds.indexOf(myId);
-            const isLast = currentIndex === aliveIds.length - 1;
-            
-            let newDay = data.day || 1;
-            let nextPhase = 'normal';
-            if(isLast) {
-                newDay++;
-                if(newDay % 4 === 0 && aliveIds.length > 2) nextPhase = 'nomination';
-            }
+    db.ref('rooms/' + currentRoom).get().then(snap => {
+        const data = snap.val();
+        if(!data) return;
 
-            let popChange = (type === 'confronto') ? -15 : 10;
-            let icon = (type === 'confronto') ? '🔥' : (type === 'amizade') ? '🤝' : (type === 'desabafo') ? '😢' : '🎉';
-            let formattedRP = `<span>${icon} <b>${myName}:</b> "${text}"</span>`;
+        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+        const currentIndex = aliveIds.indexOf(myId);
+        const isLast = currentIndex === aliveIds.length - 1;
+        
+        // Garante que o dia e a pop são números válidos
+        let currentDay = parseInt(data.day) || 1;
+        let currentPop = parseInt(data.players[myId].pop) || 50;
+        
+        let newDay = currentDay;
+        let nextPhase = 'normal';
+        
+        if(isLast) {
+            newDay++;
+            if(newDay % 4 === 0 && aliveIds.length > 2) nextPhase = 'nomination';
+        }
 
-            let updates = {};
-            updates['/players/' + myId + '/pop'] = data.players[myId].pop + popChange;
-            updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
-            updates['/day'] = newDay;
-            updates['/phase'] = nextPhase;
-            updates['/lastRP'] = formattedRP;
-            
-            db.ref('rooms/' + currentRoom).update(updates);
-            document.getElementById('rp-text').value = "";
-        });
-    }
+        let popChange = (type === 'confronto') ? -15 : 10;
+        let icon = (type === 'confronto') ? '🔥' : (type === 'amizade') ? '🤝' : (type === 'desabafo') ? '😢' : '🎉';
+        let formattedRP = `<span>${icon} <b>${myName}:</b> "${text}"</span>`;
+
+        let updates = {};
+        updates['/players/' + myId + '/pop'] = currentPop + popChange;
+        updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
+        updates['/day'] = newDay;
+        updates['/phase'] = nextPhase;
+        updates['/lastRP'] = formattedRP;
+        
+        db.ref('rooms/' + currentRoom).update(updates).catch(err => console.error("Erro ao enviar:", err));
+        document.getElementById('rp-text').value = "";
+    });
+}
 
     function vote(tid) {
         db.ref('rooms/' + currentRoom).get().then(snap => {
