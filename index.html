@@ -19,6 +19,8 @@
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
+        .step-box { background: #f0f0f0; padding: 15px; border-radius: 12px; border-left: 5px solid var(--pop-pink); margin-bottom: 10px; text-align: left; font-size: 0.85em; }
+        
         #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; }
         canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-action: none; display: block; margin: 0 auto; }
         
@@ -31,17 +33,33 @@
         
         .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 20px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; min-height: 50px; }
         .chat-box { height: 300px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; font-weight: 600; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-        <div class="game-panel" style="max-width: 400px;">
-            <div class="logo">BBB RP</div>
-            <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
-            <input type="text" id="my-name" placeholder="TEU NOME">
-            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR 👁️</button>
+    <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
+        <div class="game-panel" style="max-width: 500px;">
+            <div class="logo">BBB RP PORTUGAL</div>
+            
+            <div style="margin-bottom: 20px;">
+                <div class="step-box">
+                    <b>1. O QUE É ESTE JOGO?</b><br>
+                    É um jogo de interpretação (RP). Tu és um concorrente do Big Brother e tens de atuar para convencer os teus colegas a não te expulsarem!
+                </div>
+                <div class="step-box">
+                    <b>2. COMO JOGAR?</b><br>
+                    No teu turno, escolhe um tema (Discussão, Conversa, etc) e escreve a tua ação. No Dia 2 há prova de desenho!
+                </div>
+                <div class="step-box">
+                    <b>3. AS NOMEAÇÕES</b><br>
+                    No Dia 3 votam no melhor desenho (dá imunidade). No Dia 4, o mais votado da casa é expulso!
+                </div>
+            </div>
+
+            <input type="text" id="room-id" placeholder="CÓDIGO DA SALA (ex: casa1)">
+            <input type="text" id="my-name" placeholder="TEU NOME OU PERSONAGEM">
+            <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
         </div>
     </div>
 
@@ -53,7 +71,7 @@
 
         <div class="game-panel">
             <div id="day-counter" style="font-weight: 900; font-size: 1.5em; color: var(--pop-pink);">DIA 1</div>
-            <div class="rp-display" id="last-rp-action">A aguardar início...</div>
+            <div class="rp-display" id="last-rp-action">"A VOZ: Bem-vindos à casa mais vigiada do país!"</div>
 
             <div id="drawing-zone" style="display:none;">
                 <h3>🎨 CONFESSIONÁRIO: FAZ UM DESENHO!</h3>
@@ -63,23 +81,25 @@
             </div>
 
             <div id="gallery-zone" style="display:none;">
-                <h3>🖼️ VOTA NO MELHOR DESENHO</h3>
+                <h3>🖼️ GALERIA: VOTA NO MELHOR DESENHO</h3>
                 <div id="drawings-display"></div>
             </div>
 
             <div id="controls" style="display:none;">
                 <div id="normal-actions">
+                    <label style="display:block; text-align:left; font-size:0.8em; margin-bottom:5px;"><b>TEMA DA AÇÃO:</b></label>
                     <select id="rp-type">
                         <option value="CONVERSA">🤝 Conversar / Aliança</option>
                         <option value="DISCUSSÃO">🔥 Confronto / Treta</option>
-                        <option value="DESABAFO">😢 Confessionário</option>
+                        <option value="DESABAFO">😢 Confessionário / Desabafo</option>
                         <option value="FESTA">🎉 Festa / Diversão</option>
+                        <option value="REFEIÇÃO">🍳 Cozinhar / Comer</option>
                     </select>
-                    <textarea id="rp-text" placeholder="O que estás a fazer?..." rows="3"></textarea>
-                    <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR 🎬</button>
+                    <textarea id="rp-text" placeholder="Escreve aqui a tua atuação..." rows="3"></textarea>
+                    <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR AÇÃO 🎬</button>
                 </div>
                 <div id="nomination-actions" style="display:none;">
-                    <h3 style="color:red">🔴 QUEM QUERES EXPULSAR?</h3>
+                    <h3 style="color:red">🔴 HORA DE NOMEAR!</h3>
                     <div id="vote-targets"></div>
                 </div>
             </div>
@@ -94,7 +114,6 @@
     </div>
 
 <script>
-    // CONFIGURAÇÃO FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
@@ -172,12 +191,10 @@
             document.getElementById('day-counter').innerText = `DIA ${day}`;
             if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
 
-            // Mostrar zonas corretas
             document.getElementById('drawing-zone').style.display = (day === 2 && turn === myId) ? 'block' : 'none';
             document.getElementById('gallery-zone').style.display = (day === 3) ? 'block' : 'none';
             document.getElementById('normal-actions').style.display = (day !== 2 && day !== 3 && phase !== 'nomination') ? 'block' : 'none';
             
-            // Grid de Jogadores
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
             Object.keys(players).forEach(id => {
@@ -187,7 +204,6 @@
                 </div>`;
             });
 
-            // Galeria de Desenhos
             if(day === 3 && data.drawings) {
                 const gal = document.getElementById('drawings-display');
                 gal.innerHTML = "";
@@ -196,7 +212,6 @@
                 });
             }
 
-            // Exibir controlos apenas no turno
             const isMyTurn = (turn === myId && players[myId].status === 'playing');
             document.getElementById('controls').style.display = isMyTurn ? 'block' : 'none';
 
@@ -220,7 +235,7 @@
         const val = customTxt || textInput.value.trim();
         const type = typeInput.value;
 
-        if(!val && !isDraw) return alert("Escreve a tua ação!");
+        if(!val && !isDraw) return alert("Escreve a tua atuação!");
 
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
@@ -241,7 +256,7 @@
             up['/turn'] = aliveIds[(idx + 1) % aliveIds.length];
             up['/day'] = nDay;
             up['/phase'] = nPhase;
-            up['/lastRP'] = isDraw ? `🎨 <b>[DESENHO] ${myName}</b> terminou a obra!` : `🎭 <b>[${type}] ${myName}:</b> "${val}"`;
+            up['/lastRP'] = isDraw ? `🎨 <b>[DESENHO] ${myName}</b> enviou um desenho!` : `🎭 <b>[${type}] ${myName}:</b> "${val}"`;
             
             db.ref('rooms/' + currentRoom).update(up);
             textInput.value = "";
@@ -254,20 +269,21 @@
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
             const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
-            const votes = data.drawingVotes || {};
-            const total = Object.values(votes).reduce((a,b) => a+b, 0) + 1;
-            
-            if(total >= aliveIds.length) {
-                let winId = pid; let max = -1;
-                Object.keys(votes).forEach(id => { if((votes[id]||0) > max) { max = votes[id]; winId = id; } });
-                let up = {};
-                up[`/players/${winId}/immune`] = true;
-                up['/day'] = 4;
-                up['/phase'] = 'nomination';
-                up['/turn'] = aliveIds[0];
-                up['/lastRP'] = `🛡️ <b>A VOZ:</b> O desenho de ${data.players[winId].name} venceu! Imunidade para hoje.`;
-                db.ref('rooms/' + currentRoom).update(up);
-            } else { alert("Votado! Aguarda pelos outros."); }
+            db.ref('rooms/' + currentRoom + '/drawingVotes').get().then(vSnap => {
+                const votes = vSnap.val() || {};
+                const total = Object.values(votes).reduce((a,b) => a+b, 0);
+                if(total >= aliveIds.length) {
+                    let winId = pid; let max = -1;
+                    Object.keys(votes).forEach(id => { if(votes[id] > max) { max = votes[id]; winId = id; } });
+                    let up = {};
+                    up[`/players/${winId}/immune`] = true;
+                    up['/day'] = 4;
+                    up['/phase'] = 'nomination';
+                    up['/turn'] = aliveIds[0];
+                    up['/lastRP'] = `🛡️ <b>A VOZ:</b> O desenho de ${data.players[winId].name} venceu! Imunidade concedida.`;
+                    db.ref('rooms/' + currentRoom).update(up);
+                } else { alert("Votado! Aguarda pelos outros."); }
+            });
         });
     }
 
@@ -289,7 +305,7 @@
                 });
                 up['/players/' + vic + '/status'] = 'eliminated';
                 up['/phase'] = 'normal'; up['/day'] = 1;
-                up['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[vic].name} foi o mais votado e sai da casa!`;
+                up['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[vic].name} foi expulso da casa!`;
                 aliveIds.forEach(id => { up[`/players/${id}/votes`] = 0; up[`/players/${id}/immune`] = false; });
                 up['/drawings'] = null; up['/drawingVotes'] = null;
             }
