@@ -17,14 +17,14 @@
 
         body { 
             font-family: 'Outfit', sans-serif; background: var(--pop-bg); 
-            margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
-            color: var(--dark);
+            margin: 0; display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; min-height: 100vh; color: var(--dark);
         }
 
         .panel { 
-            background: white; padding: 40px; border-radius: 30px; 
+            background: white; padding: 30px; border-radius: 30px; 
             border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark);
-            text-align: center; max-width: 450px; width: 90%;
+            text-align: center; max-width: 450px; width: 90%; margin: 20px 0;
         }
 
         .logo-pop {
@@ -33,51 +33,73 @@
             margin-bottom: 20px; text-transform: uppercase;
         }
 
+        /* Estilo da Voz / Apresentador */
+        .host-area {
+            display: flex; align-items: center; background: var(--dark); 
+            color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; gap: 15px;
+        }
+        .host-icon { font-size: 30px; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
+
         input {
             width: 100%; padding: 15px; margin: 10px 0; border: 4px solid var(--dark);
             border-radius: 12px; font-weight: 800; box-sizing: border-box; font-family: 'Outfit';
         }
 
         .btn-pop {
-            width: 100%; padding: 18px; background: var(--pop-pink); color: white;
+            width: 100%; padding: 15px; background: var(--pop-pink); color: white;
             border: 4px solid var(--dark); border-radius: 15px; font-weight: 900;
             cursor: pointer; box-shadow: 5px 5px 0 var(--dark); transition: 0.1s;
-            text-transform: uppercase;
+            text-transform: uppercase; margin-top: 10px;
         }
 
-        .btn-pop:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0 var(--dark); }
+        .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
 
-        #players-grid { display: flex; gap: 15px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+        #players-grid { display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
         .card { 
-            background: var(--pop-lime); padding: 15px; border: 4px solid var(--dark); 
-            border-radius: 15px; width: 100px; box-shadow: 4px 4px 0 var(--dark); 
+            background: var(--pop-lime); padding: 12px; border: 4px solid var(--dark); 
+            border-radius: 15px; width: 90px; box-shadow: 4px 4px 0 var(--dark); 
         }
         .card.active { background: white; transform: scale(1.1); border-color: var(--pop-teal); border-style: dashed; }
+
+        .how-to { font-size: 0.85em; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px solid var(--dark); text-align: left; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
     <div id="lobby" class="panel">
-        <div class="logo-pop">BBB ONLINE</div>
-        <p style="font-weight: 800;">Escolhe uma sala e entra na casa!</p>
-        <input type="text" id="room-id" placeholder="NOME DA SALA (ex: sala1)">
+        <div class="logo-pop">BBB Term-O</div>
+        
+        <div class="how-to">
+            <b>COMO JOGAR:</b><br>
+            • Entra na mesma sala que os teus amigos.<br>
+            • No teu turno, escolhe uma ação.<br>
+            • <b>Objetivo:</b> Ser o mais popular de Portugal! 👁️🇵🇹
+        </div>
+
+        <input type="text" id="room-id" placeholder="NOME DA SALA (ex: casa1)">
         <input type="text" id="my-name" placeholder="TEU NOME">
         <button class="btn-pop" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
     </div>
 
     <div id="game-room" class="panel" style="display:none;">
-        <div id="status" style="font-weight: 900; margin-bottom: 20px; font-size: 1.2em; text-transform: uppercase;">A AGUARDAR JOGADORES...</div>
+        <div class="host-area">
+            <div class="host-icon">👁️</div>
+            <div id="host-msg" style="font-size: 0.9em; font-weight: 600;">"Olá Portugal! Quem será o próximo a sair?"</div>
+        </div>
+
+        <div id="status" style="font-weight: 900; margin-bottom: 20px; font-size: 1.1em; text-transform: uppercase;">A carregar...</div>
+        
         <div id="players-grid"></div>
         
-        <div id="controls" style="display:none; margin-top: 30px;">
+        <div id="controls" style="display:none; margin-top: 20px;">
             <button class="btn-pop" onclick="sendAction('conversar')">💬 CONVERSAR (+10 Pop)</button>
-            <button class="btn-pop" style="background: var(--pop-purple); margin-top: 10px;" onclick="sendAction('treta')">🔥 CRIAR TRETA (-15 Pop)</button>
+            <button class="btn-pop" style="background: var(--pop-purple)" onclick="sendAction('treta')">🔥 CRIAR TRETA (-15 Pop)</button>
+            <button class="btn-pop" style="background: var(--pop-teal)" onclick="sendAction('sorte')">🎁 CAIXA MISTÉRIO (?)</button>
         </div>
     </div>
 
 <script>
-    // AS TUAS CHAVES CONFIGURADAS
-   const firebaseConfig = {
+    const firebaseConfig = {
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
         projectId: "bigbrother-termo",
@@ -87,7 +109,6 @@
         appId: "1:470183788507:web:9c186b3dd6f5ce90b6f1fe"
     };
 
-    // Inicializa
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentRoom = "", myId = "";
@@ -98,12 +119,7 @@
         if(!currentRoom || !name) return alert("Preenche os campos!");
 
         myId = name + "_" + Math.floor(Math.random()*1000);
-        
-        // Criar jogador na base de dados
-        db.ref('rooms/' + currentRoom + '/players/' + myId).set({
-            name: name,
-            pop: 50
-        });
+        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: name, pop: 50 });
         
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-room').style.display = 'block';
@@ -117,29 +133,25 @@
 
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
-            const players = data.players;
-            const ids = Object.keys(players);
-            
-            // Define quem é o turno (se não existir, o primeiro a entrar começa)
+            const ids = Object.keys(data.players);
             const turn = data.turn || ids[0];
 
             ids.forEach(id => {
-                const p = players[id];
+                const p = data.players[id];
                 const isActive = (id === turn) ? 'active' : '';
                 grid.innerHTML += `
                     <div class="card ${isActive}">
-                        <div style="font-size: 1.5em">👤</div>
-                        <b style="display:block; margin: 5px 0;">${p.name}</b>
-                        <span style="font-size: 0.8em">POP: ${p.pop}%</span>
+                        <div style="font-size: 1.2em">👤</div>
+                        <b style="display:block; font-size: 0.9em;">${p.name}</b>
+                        <span style="font-size: 0.8em">${p.pop}%</span>
                     </div>`;
             });
 
-            // Mostra botões apenas se for a minha vez
             document.getElementById('controls').style.display = (turn === myId) ? 'block' : 'none';
-            document.getElementById('status').innerText = (turn === myId) ? "TUA VEZ: JOGA!" : "Vez de " + players[turn].name;
-            
-            // Cor de fundo do status muda se for a tua vez
+            document.getElementById('status').innerText = (turn === myId) ? "É A TUA VEZ!" : "Vez de " + data.players[turn].name;
             document.getElementById('status').style.color = (turn === myId) ? "var(--pop-pink)" : "var(--dark)";
+            
+            if(data.lastMsg) document.getElementById('host-msg').innerText = data.lastMsg;
         });
     }
 
@@ -147,17 +159,27 @@
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
             const ids = Object.keys(data.players);
-            const currentIndex = ids.indexOf(myId);
-            const nextIndex = (currentIndex + 1) % ids.length;
-            const nextPlayerId = ids[nextIndex];
+            const next = ids[(ids.indexOf(myId) + 1) % ids.length];
+            
+            let popChange = 0;
+            let msg = "";
 
-            const currentPop = data.players[myId].pop;
-            const newPop = currentPop + (act === 'conversar' ? 10 : -15);
+            if(act === 'conversar') {
+                popChange = 10;
+                msg = `"${data.players[myId].name} está a conquistar Portugal!"`;
+            } else if(act === 'treta') {
+                popChange = -15;
+                msg = `"A casa está a ferro e fogo com ${data.players[myId].name}!"`;
+            } else if(act === 'sorte') {
+                const sorte = Math.random() > 0.5;
+                popChange = sorte ? 20 : -20;
+                msg = sorte ? `"A VOZ deu um bónus a ${data.players[myId].name}!"` : `"Má sorte! ${data.players[myId].name} foi castigado!"`;
+            }
 
-            // Atualiza a minha popularidade e passa o turno para o próximo
-            let updates = {};
-            updates['/players/' + myId + '/pop'] = newPop;
-            updates['/turn'] = nextPlayerId;
+            const updates = {};
+            updates['/players/' + myId + '/pop'] = data.players[myId].pop + popChange;
+            updates['/turn'] = next;
+            updates['/lastMsg'] = msg;
 
             db.ref('rooms/' + currentRoom).update(updates);
         });
