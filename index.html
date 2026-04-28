@@ -10,31 +10,23 @@
     <style>
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
         body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
-
         #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; }
-canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-action: none; }
-.drawing-card { border: 2px solid var(--dark); margin: 5px; padding: 5px; border-radius: 10px; display: inline-block; }
-.drawing-card img { width: 150px; height: 150px; display: block; border-radius: 5px; }
-        
+        canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-action: none; display: block; margin: 0 auto; }
+        .drawing-card { border: 2px solid var(--dark); margin: 5px; padding: 5px; border-radius: 10px; display: inline-block; background: white; }
+        .drawing-card img { width: 150px; height: 150px; display: block; border-radius: 5px; }
         .main-container { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
         .side-panel { background: white; padding: 20px; border-radius: 20px; border: 4px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); flex: 1; min-width: 250px; height: fit-content; }
         .game-panel { flex: 2; min-width: 350px; background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; }
-
         .logo { font-family: 'Montserrat'; font-size: 2.2em; -webkit-text-stroke: 1.5px var(--dark); color: white; filter: drop-shadow(3px 3px 0 var(--pop-pink)); margin-bottom: 15px; text-transform: uppercase; }
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
-        
         .chat-box { height: 350px; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
         .chat-msg { margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee; }
-
         .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 85px; text-align: center; transition: 0.3s; }
         .card.active { border-color: var(--pop-pink); background: white; transform: scale(1.1); box-shadow: 0 0 15px var(--pop-pink); }
         .card.eliminated { background: #636e72 !important; opacity: 0.5; filter: grayscale(1); }
-
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; box-sizing: border-box; font-family: 'Outfit'; font-weight: 600; }
-        
         .rp-display { background: #fff3cd; border: 3px dashed var(--dark); padding: 20px; border-radius: 15px; margin: 15px 0; font-style: italic; font-weight: 600; min-height: 50px; display: flex; align-items: center; justify-content: center; }
-        
         .step-box { background: #f0f0f0; padding: 15px; border-radius: 12px; border-left: 5px solid var(--pop-pink); margin-bottom: 10px; text-align: left; font-size: 0.85em; }
     </style>
 </head>
@@ -43,22 +35,11 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
     <div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
         <div class="game-panel" style="max-width: 500px;">
             <div class="logo">BBB RP PORTUGAL</div>
-            
             <div style="margin-bottom: 20px;">
-                <div class="step-box">
-                    <b>1. O QUE É ESTE JOGO?</b><br>
-                    É um jogo de interpretação (Roleplay). Tu és um concorrente do Big Brother e tens de atuar para convencer os teus colegas a não te expulsarem!
-                </div>
-                <div class="step-box">
-                    <b>2. COMO JOGAR?</b><br>
-                    No teu turno, escreve uma ação (ex: "Fui fazer o jantar e queimei a comida"). Todos vão ler a tua "atuação" no ecrã principal.
-                </div>
-                <div class="step-box">
-                    <b>3. AS NOMEAÇÕES</b><br>
-                    De 4 em 4 dias (rondas), a casa vota. Se fores o mais votado, és expulso e passas a ser apenas espectador!
-                </div>
+                <div class="step-box"><b>1. O QUE É ESTE JOGO?</b><br>É um jogo de interpretação (RP). Tu és um concorrente e tens de atuar!</div>
+                <div class="step-box"><b>2. COMO JOGAR?</b><br>No teu turno, escreve uma ação ou faz o desafio do dia.</div>
+                <div class="step-box"><b>3. PROVAS E VOTOS</b><br>Faz desenhos no Dia 2, vota no melhor no Dia 3 e expulsa alguém no Dia 4!</div>
             </div>
-
             <input type="text" id="room-id" placeholder="CÓDIGO DA SALA (ex: casa1)">
             <input type="text" id="my-name" placeholder="TEU NOME OU PERSONAGEM">
             <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
@@ -69,69 +50,54 @@ canvas { background: #fff; border: 1px solid #000; cursor: crosshair; touch-acti
         <div class="side-panel">
             <h3>📖 GUIA DE RP</h3>
             <p style="font-size: 0.85em;">
-                <b>Turnos:</b> Espera que o teu nome fique brilhante.<br><br>
-                <b>Atuações:</b> Escreve coisas que gerem conversa ou polémicas.<br><br>
-                <b>Pop:</b> O teu % sobe com boas ações, mas as nomeações são o que conta!<br><br>
-                <b>Votos:</b> Escolhe quem queres fora da casa no 4º dia.
+                <b>Turnos:</b> Espera pela tua vez (borda rosa).<br><br>
+                <b>Dia 2:</b> Desenha no confessionário.<br><br>
+                <b>Dia 3:</b> Vota no melhor desenho para dar imunidade.<br><br>
+                <b>Dia 4:</b> Nomeações diretas!
             </p>
         </div>
 
         <div class="game-panel">
             <div id="day-counter" style="font-weight: 900; font-size: 1.5em; color: var(--pop-pink);">DIA 1</div>
-            
             <p style="font-size: 0.8em; font-weight: 800; margin-top: 5px;">🎥 EM DIRETO DA CASA:</p>
-            <div class="rp-display" id="last-rp-action">
-                "A VOZ: A emissão começou. Aguardamos a primeira atuação..."
-            </div>
+            <div class="rp-display" id="last-rp-action">"Aguardando primeira atuação..."</div>
             
             <div id="players-grid" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;"></div>
 
             <div id="drawing-zone" style="display:none;">
-    <h3>🎨 CONFESSIONÁRIO: DESENHA O TEU DIA!</h3>
-    <div id="canvas-container">
-        <canvas id="paintCanvas" width="250" height="250"></canvas>
-    </div>
-    <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
-    <button class="btn-pop" style="background:var(--pop-teal); color:white;" onclick="saveDrawing()">ENVIAR DESENHO</button>
-</div>
+                <h3>🎨 CONFESSIONÁRIO: DESENHA O TEU DIA!</h3>
+                <div id="canvas-container"><canvas id="paintCanvas" width="250" height="250"></canvas></div>
+                <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
+                <button class="btn-pop" style="background:var(--pop-teal); color:white;" onclick="saveDrawing()">ENVIAR DESENHO</button>
+            </div>
 
-<div id="gallery-zone" style="display:none;">
-    <h3>🖼️ GALERIA: VOTA NO MELHOR DESENHO!</h3>
-    <div id="drawings-display"></div>
-</div>
+            <div id="gallery-zone" style="display:none;">
+                <h3>🖼️ GALERIA: VOTA NO MELHOR DESENHO!</h3>
+                <div id="drawings-display"></div>
+            </div>
+
             <div id="controls" style="display:none; background: #f9f9f9; padding: 20px; border-radius: 20px; border: 2px solid var(--dark);">
                 <div id="normal-actions">
-                    <label><b>O QUE ESTÁ A TUA PERSONAGEM A FAZER?</b></label>
-                    <select id="rp-type" style="margin-top: 10px;">
-                        <option value="amizade">🤝 Conversar / Criar Aliança</option>
-                        <option value="confronto">🔥 Confrontar / Criar Treta</option>
-                        <option value="desabafo">😢 Confessionário / Desabafo</option>
-                        <option value="festa">🎉 Festa / Divertir-se</option>
-                    </select>
-                    <textarea id="rp-text" placeholder="Ex: Entrei na cozinha e comecei a discutir com toda a gente por causa do café..." rows="3"></textarea>
+                    <textarea id="rp-text" placeholder="Escreve a tua atuação aqui..." rows="3"></textarea>
                     <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendRP()">PUBLICAR AÇÃO 🎬</button>
                 </div>
-
                 <div id="nomination-actions" style="display:none;">
                     <p style="color: red; font-weight: 800;">🔴 HORA DAS NOMEAÇÕES!</p>
-                    <p style="font-size: 0.8em;">Quem merece sair hoje?</p>
                     <div id="vote-targets"></div>
                 </div>
             </div>
         </div>
 
-        
-
         <div class="side-panel">
             <h3>💬 CHAT (OFF-RP)</h3>
             <div id="chat-box" class="chat-box"></div>
-            <input type="text" id="chat-input" placeholder="Fala aqui com os amigos...">
+            <input type="text" id="chat-input" placeholder="Conversa aqui...">
             <button class="btn-pop" style="background: var(--pop-teal); color: white;" onclick="sendChat()">ENVIAR</button>
         </div>
     </div>
 
-    <script>
-const firebaseConfig = {
+<script>
+    const firebaseConfig = {
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
         projectId: "bigbrother-termo",
@@ -144,55 +110,43 @@ const firebaseConfig = {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentRoom = "", myId = "", myName = "";
-
-   function joinRoom() {
-    currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
-    myName = document.getElementById('my-name').value.trim();
-    if(!currentRoom || !myName) return alert("Preenche os campos!");
-    myId = myName + "_" + Math.floor(Math.random()*1000);
-    
-    const roomRef = db.ref('rooms/' + currentRoom);
-    
-    roomRef.get().then(snap => {
-        const data = snap.val();
-        // Se a sala não existe ou não tem turno, este jogador é o primeiro
-        if (!data || !data.turn) {
-            roomRef.update({ turn: myId, day: 1, phase: 'normal' });
-        }
-        
-        // Adiciona o jogador
-        roomRef.child('players/' + myId).set({ 
-            name: myName, 
-            pop: 50, 
-            status: 'playing', 
-            votes: 0, 
-            immune: false 
-        });
-        
-        document.getElementById('lobby').style.display = 'none';
-        document.getElementById('game-room').style.display = 'flex';
-        initCanvas();
-        listen();
-        listenChat();
-    });
-}
     let canvas, ctx, drawing = false;
+
+    function joinRoom() {
+        currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
+        myName = document.getElementById('my-name').value.trim();
+        if(!currentRoom || !myName) return alert("Preenche os campos!");
+        myId = myName + "_" + Math.floor(Math.random()*1000);
+        
+        const roomRef = db.ref('rooms/' + currentRoom);
+        roomRef.get().then(snap => {
+            const data = snap.val();
+            if (!data || !data.turn) {
+                roomRef.update({ turn: myId, day: 1, phase: 'normal' });
+            }
+            roomRef.child('players/' + myId).set({ 
+                name: myName, pop: 50, status: 'playing', votes: 0, immune: false 
+            });
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('game-room').style.display = 'flex';
+            initCanvas();
+            listen();
+            listenChat();
+        });
+    }
 
     function initCanvas() {
         canvas = document.getElementById('paintCanvas');
         ctx = canvas.getContext('2d');
-        
         const getPos = (e) => {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return { x: clientX - rect.left, y: clientY - rect.top };
         };
-
         const start = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
-        const move = (e) => { if(!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); };
+        const move = (e) => { if(!drawing) return; const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); e.preventDefault(); };
         const stop = () => { drawing = false; };
-
         canvas.addEventListener('mousedown', start); canvas.addEventListener('touchstart', start);
         canvas.addEventListener('mousemove', move); canvas.addEventListener('touchmove', move);
         canvas.addEventListener('mouseup', stop); canvas.addEventListener('touchend', stop);
@@ -200,19 +154,34 @@ const firebaseConfig = {
 
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    ffunction saveDrawing() {
-    const dataURL = canvas.toDataURL();
-    // Primeiro guarda o desenho
-    db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
-        // Depois chama uma versão especial do sendRP que não precisa de texto
-        sendRP("Enviou um desenho para o confessionário! 🎨", true);
-    }).catch(err => alert("Erro ao guardar desenho: " + err));
-}
+    function saveDrawing() {
+        const dataURL = canvas.toDataURL();
+        db.ref('rooms/' + currentRoom + '/drawings/' + myId).set(dataURL).then(() => {
+            sendRP("Enviou um desenho para o confessionário! 🎨", true);
+        });
+    }
 
-   const aliveIds = data.players ? Object.keys(data.players).filter(id => data.players[id].status === 'playing') : [];
-if (aliveIds.length === 0) return; // Espera até haver jogadores
-const turn = data.turn || aliveIds[0];
+    function listen() {
+        db.ref('rooms/' + currentRoom).on('value', (snap) => {
+            const data = snap.val();
+            if(!data || !data.players) return;
+            const players = data.players;
+            const aliveIds = Object.keys(players).filter(id => players[id].status === 'playing');
+            if (aliveIds.length === 0) return;
 
+            const day = data.day || 1;
+            const phase = data.phase || 'normal';
+            const turn = data.turn || aliveIds[0];
+
+            document.getElementById('day-counter').innerText = `DIA ${day}`;
+            if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
+
+            // Interface Visibilidade
+            document.getElementById('drawing-zone').style.display = (day === 2 && turn === myId) ? 'block' : 'none';
+            document.getElementById('gallery-zone').style.display = (day === 3) ? 'block' : 'none';
+            document.getElementById('normal-actions').style.display = (day !== 2 && day !== 3 && phase !== 'nomination') ? 'block' : 'none';
+            
+            // Grid Jogadores
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
             Object.keys(players).forEach(id => {
@@ -223,6 +192,16 @@ const turn = data.turn || aliveIds[0];
                 </div>`;
             });
 
+            // Galeria Dia 3
+            if(day === 3 && data.drawings) {
+                const gallery = document.getElementById('drawings-display');
+                gallery.innerHTML = "";
+                Object.keys(data.drawings).forEach(pid => {
+                    gallery.innerHTML += `<div class="drawing-card"><img src="${data.drawings[pid]}"><button class="btn-pop" onclick="voteDrawing('${pid}')">VOTAR</button></div>`;
+                });
+            }
+
+            // Controlos
             const isEliminated = players[myId].status === 'eliminated';
             document.getElementById('controls').style.display = (!isEliminated && turn === myId) ? 'block' : 'none';
             
@@ -241,79 +220,75 @@ const turn = data.turn || aliveIds[0];
         });
     }
 
-    function voteDrawing(pid) {
-    db.ref('rooms/' + currentRoom).get().then(snap => {
-        const data = snap.val();
-        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
-        
-        // Regista o teu voto
-        db.ref('rooms/' + currentRoom + '/drawingVotes/' + pid).transaction(v => (v || 0) + 1);
+    function sendRP(customText = null, isDrawingAction = false) {
+        const textInput = document.getElementById('rp-text');
+        const text = customText || textInput.value.trim();
+        if(!text && !isDrawingAction) return alert("Escreve algo!");
 
-        // Verifica quantos votos já foram dados no total
-        const allVotes = data.drawingVotes ? Object.values(data.drawingVotes).reduce((a, b) => a + b, 0) : 0;
-        
-        // Se este for o último voto (total de votos = número de jogadores - 1, ou todos votarem)
-        if (allVotes + 1 >= aliveIds.length) {
-            finalizarConcurso(data, aliveIds);
-        } else {
-            alert("Voto registado! Aguarda que os teus colegas votem.");
-        }
-    });
-}
+        db.ref('rooms/' + currentRoom).get().then(snap => {
+            const data = snap.val();
+            const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+            const currentIndex = aliveIds.indexOf(myId);
+            const isLast = currentIndex === aliveIds.length - 1;
+            
+            let newDay = data.day || 1;
+            let nextPhase = data.phase || 'normal';
+            let updates = {};
 
-   function sendRP(customText = null, isDrawingAction = false) {
-    const textInput = document.getElementById('rp-text');
-    const text = customText || textInput.value.trim();
-
-    // Só pede texto se NÃO for uma ação de desenho
-    if(!text && !isDrawingAction) return alert("Escreve a tua ação!");
-
-    db.ref('rooms/' + currentRoom).get().then(snap => {
-        const data = snap.val();
-        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
-        const currentIndex = aliveIds.indexOf(myId);
-        const isLast = currentIndex === aliveIds.length - 1;
-        
-        let newDay = parseInt(data.day) || 1;
-        let nextPhase = data.phase || 'normal';
-        let updates = {};
-
-        // Lógica de mudança de dia e imunidade
-        if (isLast) {
-            newDay++;
-            if (newDay === 4) {
-                let winnerId = null; let max = -1;
-                const votes = data.drawingVotes || {};
-                Object.keys(votes).forEach(id => { 
-                    if(votes[id] > max) { max = votes[id]; winnerId = id; } 
-                });
-                if(winnerId) {
-                    updates[`/players/${winnerId}/immune`] = true;
-                    updates['/lastRP'] = `🛡️ <b>A VOZ:</b> O desenho de ${data.players[winnerId].name} foi o favorito! Imunidade concedida.`;
-                }
-                nextPhase = 'nomination';
-            } else if (newDay > 4) {
-                nextPhase = 'nomination';
+            if (isLast) {
+                newDay++;
+                if (newDay >= 4) nextPhase = 'nomination';
             }
-        }
 
-        updates['/players/' + myId + '/pop'] = (parseInt(data.players[myId].pop) || 50) + 5;
-        updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
-        updates['/day'] = newDay;
-        updates['/phase'] = nextPhase;
-        
-        // Define a mensagem que aparece no ecrã
-        if(isDrawingAction) {
-            updates['/lastRP'] = `🎨 <b>${myName}</b> terminou o seu desenho no confessionário!`;
-        } else {
-            updates['/lastRP'] = `🎬 <b>${myName}:</b> "${text}"`;
-        }
-        
-        db.ref('rooms/' + currentRoom).update(updates);
-        textInput.value = ""; // Limpa a caixa de texto
-        clearCanvas(); // Limpa o quadro para a próxima vez
-    });
-}
+            updates['/players/' + myId + '/pop'] = (data.players[myId].pop || 50) + 5;
+            updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
+            updates['/day'] = newDay;
+            updates['/phase'] = nextPhase;
+            updates['/lastRP'] = isDrawingAction ? `🎨 <b>${myName}</b> enviou um desenho!` : `🎬 <b>${myName}:</b> "${text}"`;
+            
+            db.ref('rooms/' + currentRoom).update(updates);
+            textInput.value = "";
+            clearCanvas();
+        });
+    }
+
+    function voteDrawing(pid) {
+        db.ref('rooms/' + currentRoom).get().then(snap => {
+            const data = snap.val();
+            const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+            db.ref('rooms/' + currentRoom + '/drawingVotes/' + pid).transaction(v => (v || 0) + 1);
+            
+            // Verificar se todos votaram
+            db.ref('rooms/' + currentRoom + '/drawingVotes').get().then(vSnap => {
+                const vData = vSnap.val() || {};
+                const totalVotes = Object.values(vData).reduce((a, b) => a + b, 0);
+                if (totalVotes >= aliveIds.length) {
+                    finalizarConcurso(data, aliveIds);
+                } else {
+                    alert("Voto registado!");
+                }
+            });
+        });
+    }
+
+    function finalizarConcurso(data, aliveIds) {
+        db.ref('rooms/' + currentRoom + '/drawingVotes').get().then(snap => {
+            const votes = snap.val() || {};
+            let winnerId = null; let max = -1;
+            Object.keys(votes).forEach(id => { if (votes[id] > max) { max = votes[id]; winnerId = id; } });
+
+            let updates = {};
+            if (winnerId) {
+                updates[`/players/${winnerId}/immune`] = true;
+                updates['/lastRP'] = `🛡️ <b>A VOZ:</b> ${data.players[winnerId].name} venceu e está IMUNE!`;
+            }
+            updates['/day'] = 4;
+            updates['/phase'] = 'nomination';
+            updates['/turn'] = aliveIds[0];
+            db.ref('rooms/' + currentRoom).update(updates);
+        });
+    }
+
     function vote(tid) {
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
@@ -326,29 +301,19 @@ const turn = data.turn || aliveIds[0];
             updates[`/players/${tid}/votes`] = currentVotes;
             
             if (isLastVote) {
-                let victimId = tid;
-                let maxVotes = currentVotes;
+                let victimId = tid; let maxVotes = currentVotes;
                 aliveIds.forEach(id => {
-                    let v = data.players[id].votes || 0;
-                    if(id === tid) v = currentVotes;
+                    let v = (id === tid) ? currentVotes : (data.players[id].votes || 0);
                     if (v > maxVotes) { maxVotes = v; victimId = id; }
                 });
 
                 updates['/players/' + victimId + '/status'] = 'eliminated';
                 updates['/phase'] = 'normal';
                 updates['/day'] = 1;
-                updates['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[victimId].name} foi expulso!`;
-                
-                // Limpa votos e imunidades para o próximo ciclo
-                aliveIds.forEach(id => {
-                    updates[`/players/${id}/votes`] = 0;
-                    updates[`/players/${id}/immune`] = false;
-                });
-                // Limpa desenhos e votos de desenhos
-                updates['/drawings'] = null;
-                updates['/drawingVotes'] = null;
+                updates['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[victimId].name} foi expulso com ${maxVotes} votos!`;
+                aliveIds.forEach(id => { updates[`/players/${id}/votes`] = 0; updates[`/players/${id}/immune`] = false; });
+                updates['/drawings'] = null; updates['/drawingVotes'] = null;
             }
-
             updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
             db.ref('rooms/' + currentRoom).update(updates);
         });
@@ -371,38 +336,6 @@ const turn = data.turn || aliveIds[0];
             box.scrollTop = box.scrollHeight;
         });
     }
-
-        function finalizarConcurso(data, aliveIds) {
-    db.ref('rooms/' + currentRoom + '/drawingVotes').get().then(snap => {
-        const votes = snap.val() || {};
-        let winnerId = null;
-        let max = -1;
-
-        // Descobre quem teve mais votos na galeria
-        Object.keys(votes).forEach(id => {
-            if (votes[id] > max) {
-                max = votes[id];
-                winnerId = id;
-            }
-        });
-
-        let updates = {};
-        if (winnerId) {
-            updates[`/players/${winnerId}/immune`] = true;
-            updates['/lastRP'] = `🛡️ <b>A VOZ:</b> O público escolheu! O desenho de <b>${data.players[winnerId].name}</b> venceu. Ganhou IMUNIDADE para o Dia 4!`;
-        }
-
-        // SALTO PARA O DIA 4 E NOMEAÇÕES
-        updates['/day'] = 4;
-        updates['/phase'] = 'nomination';
-        updates['/turn'] = aliveIds[0]; // Começa a votação pelo primeiro da lista
-        
-        db.ref('rooms/' + currentRoom).update(updates).then(() => {
-            alert("Concurso encerrado! Começam agora as nomeações.");
-        });
-    });
-}
-        </script>
-
+</script>
 </body>
 </html>
