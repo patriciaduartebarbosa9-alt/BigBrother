@@ -2,99 +2,55 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <title>BB Online 👁️</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>BBB Term-O: Portugal Edition 👁️</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --pop-bg: #ffb800; --pop-purple: #a29bfe; --pop-teal: #00cec9;
-            --pop-pink: #fd79a8; --pop-lime: #badc58; --dark: #2d3436;
-        }
+        :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; --dead: #636e72; }
+        body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .panel { background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; width: 90%; max-width: 500px; }
+        .logo { font-family: 'Montserrat'; font-size: 2.5em; -webkit-text-stroke: 2px var(--dark); color: white; filter: drop-shadow(4px 4px 0 var(--pop-pink)); }
+        
+        .card { background: #badc58; padding: 10px; border: 3px solid var(--dark); border-radius: 15px; width: 80px; position: relative; }
+        .card.active { border-color: var(--pop-pink); transform: scale(1.1); background: white; }
+        .card.eliminated { background: var(--dead) !important; opacity: 0.5; filter: grayscale(1); }
+        .card.eliminated::after { content: "❌"; position: absolute; top: 5px; right: 5px; }
 
-        body { 
-            font-family: 'Outfit', sans-serif; background: var(--pop-bg); 
-            margin: 0; display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; min-height: 100vh; color: var(--dark);
-        }
-
-        .panel { 
-            background: white; padding: 30px; border-radius: 30px; 
-            border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark);
-            text-align: center; max-width: 450px; width: 90%; margin: 20px 0;
-        }
-
-        .logo-pop {
-            font-family: 'Montserrat'; font-size: 2.5em; color: white;
-            -webkit-text-stroke: 2px var(--dark); filter: drop-shadow(4px 4px 0 var(--pop-pink));
-            margin-bottom: 20px; text-transform: uppercase;
-        }
-
-        /* Estilo da Voz / Apresentador */
-        .host-area {
-            display: flex; align-items: center; background: var(--dark); 
-            color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; gap: 15px;
-        }
-        .host-icon { font-size: 30px; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; }
-
-        input {
-            width: 100%; padding: 15px; margin: 10px 0; border: 4px solid var(--dark);
-            border-radius: 12px; font-weight: 800; box-sizing: border-box; font-family: 'Outfit';
-        }
-
-        .btn-pop {
-            width: 100%; padding: 15px; background: var(--pop-pink); color: white;
-            border: 4px solid var(--dark); border-radius: 15px; font-weight: 900;
-            cursor: pointer; box-shadow: 5px 5px 0 var(--dark); transition: 0.1s;
-            text-transform: uppercase; margin-top: 10px;
-        }
-
-        .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
-
-        #players-grid { display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
-        .card { 
-            background: var(--pop-lime); padding: 12px; border: 4px solid var(--dark); 
-            border-radius: 15px; width: 90px; box-shadow: 4px 4px 0 var(--dark); 
-        }
-        .card.active { background: white; transform: scale(1.1); border-color: var(--pop-teal); border-style: dashed; }
-
-        .how-to { font-size: 0.85em; background: #f0f0f0; padding: 15px; border-radius: 15px; border: 2px solid var(--dark); text-align: left; margin-bottom: 15px; }
+        .btn-pop { width: 100%; padding: 15px; margin-top: 10px; border-radius: 15px; border: 4px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 var(--dark); text-transform: uppercase; }
+        .vote-btn { background: var(--pop-pink); color: white; font-size: 0.8em; padding: 5px; margin-top: 5px; }
+        
+        .host-msg { background: var(--dark); color: white; padding: 15px; border-radius: 15px; margin: 15px 0; font-size: 0.9em; min-height: 40px; }
     </style>
 </head>
 <body>
 
     <div id="lobby" class="panel">
-        <div class="logo-pop">BBB Term-O</div>
-        
-        <div class="how-to">
-            <b>COMO JOGAR:</b><br>
-            • Entra na mesma sala que os teus amigos.<br>
-            • No teu turno, escolhe uma ação.<br>
-            • <b>Objetivo:</b> Ser o mais popular de Portugal! 👁️🇵🇹
-        </div>
-
-        <input type="text" id="room-id" placeholder="NOME DA SALA (ex: casa1)">
-        <input type="text" id="my-name" placeholder="TEU NOME">
-        <button class="btn-pop" onclick="joinRoom()">ENTRAR NA CASA 👁️</button>
+        <div class="logo">BBB TERMO</div>
+        <input type="text" id="room-id" placeholder="CÓDIGO DA SALA" style="width:100%; padding:15px; margin: 10px 0; box-sizing: border-box; border: 3px solid var(--dark); border-radius: 10px;">
+        <input type="text" id="my-name" placeholder="TEU NOME" style="width:100%; padding:15px; margin-bottom: 10px; box-sizing: border-box; border: 3px solid var(--dark); border-radius: 10px;">
+        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">Entrar na Casa 👁️</button>
     </div>
 
     <div id="game-room" class="panel" style="display:none;">
-        <div class="host-area">
-            <div class="host-icon">👁️</div>
-            <div id="host-msg" style="font-size: 0.9em; font-weight: 600;">"Olá Portugal! Quem será o próximo a sair?"</div>
-        </div>
+        <div id="day-counter" style="font-weight: 900; font-size: 1.2em;">DIA 1</div>
+        <div class="host-msg" id="host-msg">"A VOZ: Bem-vindos a Portugal!"</div>
+        
+        <div id="players-grid" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;"></div>
 
-        <div id="status" style="font-weight: 900; margin-bottom: 20px; font-size: 1.1em; text-transform: uppercase;">A carregar...</div>
-        
-        <div id="players-grid"></div>
-        
         <div id="controls" style="display:none; margin-top: 20px;">
-            <button class="btn-pop" onclick="sendAction('conversar')">💬 CONVERSAR (+10 Pop)</button>
-            <button class="btn-pop" style="background: var(--pop-purple)" onclick="sendAction('treta')">🔥 CRIAR TRETA (-15 Pop)</button>
-            <button class="btn-pop" style="background: var(--pop-teal)" onclick="sendAction('sorte')">🎁 CAIXA MISTÉRIO (?)</button>
+            <div id="normal-actions">
+                <button class="btn-pop" style="background: #fff;" onclick="sendAction('conversar')">💬 Conversar (+10 Pop)</button>
+                <button class="btn-pop" style="background: var(--pop-teal);" onclick="sendAction('treta')">🔥 Treta (-15 Pop)</button>
+            </div>
+            <div id="nomination-actions" style="display:none;">
+                <p><b>HORA DAS NOMEAÇÕES!</b> Escolhe alguém para sair:</p>
+                <div id="vote-targets"></div>
+            </div>
+        </div>
+        <div id="spectator-msg" style="display:none; color: red; font-weight: 800; margin-top: 20px;">
+            ESTÁS ELIMINADO! Podes apenas observar. 👁️
         </div>
     </div>
 
@@ -103,7 +59,7 @@
         apiKey: "AIzaSyAWHACXWydz1BjmW592oopZg9YOrVQaOYA",
         authDomain: "bigbrother-termo.firebaseapp.com",
         projectId: "bigbrother-termo",
-        databaseURL: "https://bigbrother-termo-default-rtdb.europe-west1.firebasedatabase.app", 
+        databaseURL: "https://bigbrother-termo-default-rtdb.europe-west1.firebasedatabase.app",
         storageBucket: "bigbrother-termo.firebasestorage.app",
         messagingSenderId: "470183788507",
         appId: "1:470183788507:web:9c186b3dd6f5ce90b6f1fe"
@@ -116,78 +72,128 @@
     function joinRoom() {
         currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
         const name = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !name) return alert("Preenche os campos!");
-
+        if(!currentRoom || !name) return;
         myId = name + "_" + Math.floor(Math.random()*1000);
-        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: name, pop: 50 });
-        
+        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: name, pop: 50, status: 'playing', votes: 0 });
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-room').style.display = 'block';
         listen();
     }
 
-    // Limpa o jogador da base de dados quando ele fecha a aba ou sai da página
-window.addEventListener('beforeunload', function() {
-    if (currentRoom && myId) {
-        db.ref('rooms/' + currentRoom + '/players/' + myId).remove();
-    }
-});
-
     function listen() {
         db.ref('rooms/' + currentRoom).on('value', (snap) => {
             const data = snap.val();
-            if(!data || !data.players) return;
+            if(!data) return;
+            const players = data.players;
+            const ids = Object.keys(players);
+            const aliveIds = ids.filter(id => players[id].status === 'playing');
+            const day = data.day || 1;
+            const turn = data.turn || aliveIds[0];
+            const phase = data.phase || 'normal';
 
+            document.getElementById('day-counter').innerText = `DIA ${day}`;
+            document.getElementById('host-msg').innerText = data.lastMsg || "A VOZ está a observar...";
+
+            // Atualizar Grid
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
-            const ids = Object.keys(data.players);
-            const turn = data.turn || ids[0];
-
             ids.forEach(id => {
-                const p = data.players[id];
-                const isActive = (id === turn) ? 'active' : '';
+                const p = players[id];
                 grid.innerHTML += `
-                    <div class="card ${isActive}">
-                        <div style="font-size: 1.2em">👤</div>
-                        <b style="display:block; font-size: 0.9em;">${p.name}</b>
-                        <span style="font-size: 0.8em">${p.pop}%</span>
+                    <div class="card ${id === turn ? 'active' : ''} ${p.status === 'eliminated' ? 'eliminated' : ''}">
+                        <b>${p.name}</b><br>${p.pop}%
                     </div>`;
             });
 
-            document.getElementById('controls').style.display = (turn === myId) ? 'block' : 'none';
-            document.getElementById('status').innerText = (turn === myId) ? "É A TUA VEZ!" : "Vez de " + data.players[turn].name;
-            document.getElementById('status').style.color = (turn === myId) ? "var(--pop-pink)" : "var(--dark)";
+            // Lógica de Visibilidade
+            const isEliminated = players[myId].status === 'eliminated';
+            document.getElementById('spectator-msg').style.display = isEliminated ? 'block' : 'none';
             
-            if(data.lastMsg) document.getElementById('host-msg').innerText = data.lastMsg;
+            if (!isEliminated && turn === myId) {
+                document.getElementById('controls').style.display = 'block';
+                if (phase === 'nomination') {
+                    document.getElementById('normal-actions').style.display = 'none';
+                    document.getElementById('nomination-actions').style.display = 'block';
+                    const targets = document.getElementById('vote-targets');
+                    targets.innerHTML = "";
+                    aliveIds.forEach(id => {
+                        if(id !== myId) targets.innerHTML += `<button class="btn-pop vote-btn" onclick="vote('${id}')">Votar em ${players[id].name}</button>`;
+                    });
+                } else {
+                    document.getElementById('normal-actions').style.display = 'block';
+                    document.getElementById('nomination-actions').style.display = 'none';
+                }
+            } else {
+                document.getElementById('controls').style.display = 'none';
+            }
         });
     }
 
     function sendAction(act) {
         db.ref('rooms/' + currentRoom).get().then(snap => {
             const data = snap.val();
-            const ids = Object.keys(data.players);
-            const next = ids[(ids.indexOf(myId) + 1) % ids.length];
+            const players = data.players;
+            const aliveIds = Object.keys(players).filter(id => players[id].status === 'playing');
+            const currentIndex = aliveIds.indexOf(myId);
+            const isLastPlayer = currentIndex === aliveIds.length - 1;
             
-            let popChange = 0;
+            let newDay = data.day || 1;
+            let nextPhase = data.phase || 'normal';
             let msg = "";
+            let popChange = act === 'conversar' ? 10 : -15;
 
-            if(act === 'conversar') {
-                popChange = 10;
-                msg = `"${data.players[myId].name} está a conquistar Portugal!"`;
-            } else if(act === 'treta') {
-                popChange = -15;
-                msg = `"A casa está a ferro e fogo com ${data.players[myId].name}!"`;
-            } else if(act === 'sorte') {
-                const sorte = Math.random() > 0.5;
-                popChange = sorte ? 20 : -20;
-                msg = sorte ? `"A VOZ deu um bónus a ${data.players[myId].name}!"` : `"Má sorte! ${data.players[myId].name} foi castigado!"`;
+            if (isLastPlayer) {
+                newDay++;
+                if (newDay % 4 === 0 && aliveIds.length > 2) {
+                    nextPhase = 'nomination';
+                    msg = "A VOZ: Chegou a hora das NOMEAÇÕES! Escolham com sabedoria.";
+                } else if (aliveIds.length <= 2 && newDay > 1) {
+                    msg = "A VOZ: ESTAMOS NA GRANDE FINAL!";
+                }
             }
 
             const updates = {};
-            updates['/players/' + myId + '/pop'] = data.players[myId].pop + popChange;
-            updates['/turn'] = next;
-            updates['/lastMsg'] = msg;
+            updates['/players/' + myId + '/pop'] = players[myId].pop + popChange;
+            updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
+            updates['/day'] = newDay;
+            updates['/phase'] = nextPhase;
+            if(msg) updates['/lastMsg'] = msg;
+            
+            db.ref('rooms/' + currentRoom).update(updates);
+        });
+    }
 
+    function vote(targetId) {
+        db.ref('rooms/' + currentRoom).get().then(snap => {
+            const data = snap.val();
+            const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+            const currentIndex = aliveIds.indexOf(myId);
+            const isLastVote = currentIndex === aliveIds.length - 1;
+
+            let updates = {};
+            updates[`/players/${targetId}/votes`] = (data.players[targetId].votes || 0) + 1;
+            
+            if (isLastVote) {
+                // Calcular quem sai (mais votos ou menor pop se empatar)
+                let mostVotes = -1;
+                let victimId = "";
+                aliveIds.forEach(id => {
+                    let vCount = data.players[id].votes || 0;
+                    if(id === targetId) vCount++; // conta o voto atual
+                    if (vCount > mostVotes) {
+                        mostVotes = vCount;
+                        victimId = id;
+                    }
+                });
+
+                updates['/players/' + victimId + '/status'] = 'eliminated';
+                updates['/phase'] = 'normal';
+                updates['/lastMsg'] = `A VOZ: ${data.players[victimId].name} foi expulso da casa!`;
+                // Reset de votos
+                aliveIds.forEach(id => updates[`/players/${id}/votes`] = 0);
+            }
+
+            updates['/turn'] = aliveIds[(currentIndex + 1) % aliveIds.length];
             db.ref('rooms/' + currentRoom).update(updates);
         });
     }
