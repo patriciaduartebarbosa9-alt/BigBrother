@@ -11,50 +11,53 @@
         :root { --pop-bg: #ffb800; --pop-pink: #fd79a8; --pop-teal: #00cec9; --dark: #2d3436; }
         body { font-family: 'Outfit'; background: var(--pop-bg); margin: 0; min-height: 100vh; color: var(--dark); }
         
-        .container { max-width: 900px; margin: 20px auto; padding: 20px; }
-        .game-panel { background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; }
+        .main-layout { display: flex; gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        .game-panel { flex: 2; min-width: 350px; background: white; padding: 30px; border-radius: 30px; border: 6px solid var(--dark); box-shadow: 10px 10px 0 var(--dark); text-align: center; }
+        .side-panel { flex: 1; min-width: 280px; background: white; padding: 20px; border-radius: 20px; border: 4px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); display: flex; flex-direction: column; height: 600px; }
         
         .logo { font-family: 'Montserrat'; font-size: 2.2em; -webkit-text-stroke: 1.5px var(--dark); color: white; filter: drop-shadow(3px 3px 0 var(--pop-pink)); margin-bottom: 15px; text-transform: uppercase; }
         .btn-pop { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: 3px solid var(--dark); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--dark); text-transform: uppercase; transition: 0.1s; }
         .btn-pop:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0 var(--dark); }
         
-        /* Paleta de Cores Anterior */
         .color-picker { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; }
-        .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--dark); cursor: pointer; transition: 0.2s; }
+        .color-btn { width: 35px; height: 35px; border-radius: 50%; border: 3px solid var(--dark); cursor: pointer; }
 
         #canvas-container { background: white; border: 3px solid var(--dark); border-radius: 15px; padding: 10px; margin: 10px 0; display: inline-block; }
         canvas { background: #fff; cursor: crosshair; touch-action: none; display: block; }
         
+        .chat-box { flex-grow: 1; overflow-y: auto; background: #f9f9f9; border: 2px solid var(--dark); border-radius: 10px; padding: 10px; margin-bottom: 10px; text-align: left; font-size: 0.9em; }
         .status-msg { background: #fff3cd; border: 2px dashed var(--dark); padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: 700; }
-        .vote-card { border: 4px solid var(--dark); border-radius: 20px; padding: 15px; margin-top: 20px; background: #f9f9f9; }
-        .vote-card img { width: 100%; max-width: 400px; border-radius: 10px; border: 2px solid var(--dark); }
         
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; box-sizing: border-box; font-weight: 600; }
+        .vote-card { border: 4px solid var(--dark); border-radius: 20px; padding: 15px; margin-top: 20px; background: #f9f9f9; }
+        .vote-card img { width: 100%; border-radius: 10px; border: 2px solid var(--dark); }
+        
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid var(--dark); border-radius: 8px; font-family: 'Outfit'; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="lobby" class="game-panel">
-        <div class="logo">DUELO DE CITAÇÕES</div>
-        <p>Escreve, Desenha e Vota!</p>
+<div id="lobby" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+    <div class="game-panel" style="max-width: 450px;">
+        <div class="logo">DUELO CITAÇÕES</div>
         <input type="text" id="room-id" placeholder="CÓDIGO DA SALA">
         <input type="text" id="my-name" placeholder="TEU NOME">
-        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR NO JOGO 👁️</button>
+        <button class="btn-pop" style="background: var(--pop-pink); color: white;" onclick="joinRoom()">ENTRAR 👁️</button>
     </div>
+</div>
 
-    <div id="game-area" class="game-panel" style="display:none;">
+<div id="game-area" class="main-layout" style="display:none;">
+    <div class="game-panel">
         <div id="status" class="status-msg">Aguardando jogadores...</div>
         
         <div id="phase-write" style="display:none;">
-            <h3>✍️ Escreve uma citação ou frase:</h3>
-            <textarea id="phrase-input" placeholder="Ex: Um astronauta a comer pizza na lua..." rows="3"></textarea>
+            <h3>✍️ Escreve uma citação:</h3>
+            <textarea id="phrase-input" placeholder="Ex: Um dinossauro mestre de cozinha..." rows="3"></textarea>
             <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitPhrase()">ENVIAR FRASE</button>
         </div>
 
         <div id="phase-draw" style="display:none;">
-            <h3>🎨 DESENHA A CITAÇÃO:</h3>
-            <div id="target-phrase" style="font-size: 1.4em; font-weight: 900; color: var(--pop-pink); margin-bottom: 15px; text-transform: uppercase;"></div>
+            <p>DESENHA ESTA CITAÇÃO:</p>
+            <div id="target-phrase" style="font-size: 1.5em; font-weight: 900; color: var(--pop-pink); margin-bottom: 15px;"></div>
             
             <div class="color-picker">
                 <div class="color-btn" style="background: #000000" onclick="changeColor('#000000')"></div>
@@ -64,20 +67,27 @@
                 <div class="color-btn" style="background: #a29bfe" onclick="changeColor('#a29bfe')"></div>
             </div>
 
-            <div id="canvas-container"><canvas id="paintCanvas" width="350" height="300"></canvas></div>
+            <div id="canvas-container"><canvas id="paintCanvas" width="320" height="280"></canvas></div>
             <button class="btn-pop" onclick="clearCanvas()">LIMPAR</button>
             <button class="btn-pop" style="background: var(--pop-teal); color:white;" onclick="submitDrawing()">ENVIAR DESENHO</button>
         </div>
 
         <div id="phase-vote" style="display:none;">
-            <h3>⭐ QUAL O MELHOR DESENHO?</h3>
+            <h3>⭐ QUAL O MELHOR?</h3>
             <div id="vote-gallery"></div>
         </div>
 
         <div id="phase-results" style="display:none;">
             <h2 id="winner-text"></h2>
-            <button class="btn-pop" onclick="location.reload()">JOGAR NOVAMENTE</button>
+            <button class="btn-pop" onclick="location.reload()">NOVO JOGO</button>
         </div>
+    </div>
+
+    <div class="side-panel">
+        <h3>💬 CHAT OFF</h3>
+        <div id="chat-box" class="chat-box"></div>
+        <input type="text" id="chat-input" placeholder="Escreve algo...">
+        <button class="btn-pop" style="font-size: 0.8em;" onclick="sendChat()">ENVIAR</button>
     </div>
 </div>
 
@@ -105,9 +115,10 @@
         db.ref('duelo/'+currentRoom+'/players/'+myId).onDisconnect().remove();
 
         document.getElementById('lobby').style.display = 'none';
-        document.getElementById('game-area').style.display = 'block';
+        document.getElementById('game-area').style.display = 'flex';
         initCanvas();
         listen();
+        listenChat();
     }
 
     function initCanvas() {
@@ -146,6 +157,24 @@
         db.ref('duelo/'+currentRoom+'/votes/'+myId).set(true);
     }
 
+    function sendChat() {
+        const input = document.getElementById('chat-input');
+        if(!input.value) return;
+        db.ref('duelo/'+currentRoom+'/chat').push({ name: myName, msg: input.value });
+        input.value = "";
+    }
+
+    function listenChat() {
+        db.ref('duelo/'+currentRoom+'/chat').limitToLast(20).on('value', snap => {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = "";
+            snap.forEach(c => {
+                box.innerHTML += `<div><b>${c.val().name}:</b> ${c.val().msg}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
     function listen() {
         db.ref('duelo/'+currentRoom).on('value', snap => {
             const data = snap.val();
@@ -157,49 +186,35 @@
             const drawings = data.drawings || {};
             const votes = data.votes || {};
 
-            // LÓGICA DE FASES
             if(Object.keys(phrases).length < numP) {
-                document.getElementById('status').innerText = "FASE 1: Escrevam as vossas citações!";
+                document.getElementById('status').innerText = "FASE 1: ESCREVER CITAÇÕES";
                 document.getElementById('phase-write').style.display = 'block';
             } 
             else if(Object.keys(drawings).length < numP) {
-                document.getElementById('status').innerText = "FASE 2: Desenha a citação do rival!";
+                document.getElementById('status').innerText = "FASE 2: DESENHAR";
                 document.getElementById('phase-write').style.display = 'none';
                 document.getElementById('phase-draw').style.display = 'block';
-                
-                // Atribui a frase do "vizinho"
                 const myIdx = pIds.indexOf(myId);
                 const targetIdx = (myIdx + 1) % numP;
                 document.getElementById('target-phrase').innerText = phrases[pIds[targetIdx]];
             }
             else if(Object.keys(votes).length < numP) {
-                document.getElementById('status').innerText = "FASE 3: Votação!";
+                document.getElementById('status').innerText = "FASE 3: VOTAÇÃO";
                 document.getElementById('phase-draw').style.display = 'none';
                 document.getElementById('phase-vote').style.display = 'block';
-                
                 const gal = document.getElementById('vote-gallery');
                 gal.innerHTML = "";
                 Object.keys(drawings).forEach(pid => {
                     if(pid !== myId) {
-                        gal.innerHTML += `
-                            <div class="vote-card">
-                                <p>Desenho de <b>${players[pid].name}</b></p>
-                                <img src="${drawings[pid]}">
-                                <button class="btn-pop" style="background:#badc58" onclick="vote('${pid}')">VOTAR ⭐</button>
-                            </div>`;
+                        gal.innerHTML += `<div class="vote-card"><p>De: ${players[pid].name}</p><img src="${drawings[pid]}"><button class="btn-pop" onclick="vote('${pid}')">VOTAR ⭐</button></div>`;
                     }
                 });
-            }
-            else {
+            } else {
                 document.getElementById('phase-vote').style.display = 'none';
                 document.getElementById('phase-results').style.display = 'block';
-                document.getElementById('status').innerText = "RESULTADOS!";
-                
                 let win = ""; let max = -1;
-                pIds.forEach(id => {
-                    if(players[id].score > max) { max = players[id].score; win = players[id].name; }
-                });
-                document.getElementById('winner-text').innerText = `🏆 ${win} venceu com ${max} votos!`;
+                pIds.forEach(id => { if(players[id].score > max) { max = players[id].score; win = players[id].name; }});
+                document.getElementById('winner-text').innerText = `🏆 ${win} GANHOU!`;
             }
         });
     }
