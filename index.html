@@ -145,22 +145,37 @@ const firebaseConfig = {
     const db = firebase.database();
     let currentRoom = "", myId = "", myName = "";
 
-    function joinRoom() {
-        currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
-        myName = document.getElementById('my-name').value.trim();
-        if(!currentRoom || !myName) return alert("Preenche os campos!");
-        myId = myName + "_" + Math.floor(Math.random()*1000);
+   function joinRoom() {
+    currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
+    myName = document.getElementById('my-name').value.trim();
+    if(!currentRoom || !myName) return alert("Preenche os campos!");
+    myId = myName + "_" + Math.floor(Math.random()*1000);
+    
+    const roomRef = db.ref('rooms/' + currentRoom);
+    
+    roomRef.get().then(snap => {
+        const data = snap.val();
+        // Se a sala não existe ou não tem turno, este jogador é o primeiro
+        if (!data || !data.turn) {
+            roomRef.update({ turn: myId, day: 1, phase: 'normal' });
+        }
         
-        db.ref('rooms/' + currentRoom + '/day').transaction(d => d || 1);
-        db.ref('rooms/' + currentRoom + '/players/' + myId).set({ name: myName, pop: 50, status: 'playing', votes: 0, immune: false });
+        // Adiciona o jogador
+        roomRef.child('players/' + myId).set({ 
+            name: myName, 
+            pop: 50, 
+            status: 'playing', 
+            votes: 0, 
+            immune: false 
+        });
         
         document.getElementById('lobby').style.display = 'none';
         document.getElementById('game-room').style.display = 'flex';
         initCanvas();
         listen();
         listenChat();
-    }
-
+    });
+}
     let canvas, ctx, drawing = false;
 
     function initCanvas() {
@@ -194,35 +209,9 @@ const firebaseConfig = {
     }).catch(err => alert("Erro ao guardar desenho: " + err));
 }
 
-    function listen() {
-        db.ref('rooms/' + currentRoom).on('value', (snap) => {
-            const data = snap.val();
-            if(!data || !data.players) return;
-            const players = data.players;
-            const aliveIds = Object.keys(players).filter(id => players[id].status === 'playing');
-            const day = data.day || 1;
-            const turn = data.turn || aliveIds[0];
-            const phase = data.phase || 'normal';
-
-            document.getElementById('day-counter').innerText = `DIA ${day}`;
-            if(data.lastRP) document.getElementById('last-rp-action').innerHTML = data.lastRP;
-
-            // Zonas de Jogo Especial
-            document.getElementById('drawing-zone').style.display = (day === 2 && turn === myId) ? 'block' : 'none';
-            document.getElementById('gallery-zone').style.display = (day === 3) ? 'block' : 'none';
-            document.getElementById('normal-actions').style.display = (day !== 2 && day !== 3 && phase !== 'nomination') ? 'block' : 'none';
-
-            if(day === 3 && data.drawings) {
-                const gallery = document.getElementById('drawings-display');
-                gallery.innerHTML = "";
-                Object.keys(data.drawings).forEach(pid => {
-                    gallery.innerHTML += `
-                        <div class="drawing-card">
-                            <img src="${data.drawings[pid]}">
-                            <button class="btn-pop" style="font-size:10px; background:var(--pop-teal)" onclick="voteDrawing('${pid}')">VOTAR</button>
-                        </div>`;
-                });
-            }
+   const aliveIds = data.players ? Object.keys(data.players).filter(id => data.players[id].status === 'playing') : [];
+if (aliveIds.length === 0) return; // Espera até haver jogadores
+const turn = data.turn || aliveIds[0];
 
             const grid = document.getElementById('players-grid');
             grid.innerHTML = "";
