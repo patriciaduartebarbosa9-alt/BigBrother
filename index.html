@@ -328,6 +328,98 @@
             b.scrollTop = b.scrollHeight;
         });
     }
+
+    // --- COLA ESTAS FUNÇÕES DENTRO DA TUA TAG <SCRIPT> ---
+
+function joinRoom() {
+    currentRoom = document.getElementById('room-id').value.trim().toLowerCase();
+    myName = document.getElementById('my-name').value.trim();
+    if(!currentRoom || !myName) return alert("Preenche os dados!");
+    myId = myName.replace(/\s+/g, '_') + "_" + Math.floor(Math.random()*1000);
+    
+    const playerRef = db.ref('rooms/' + currentRoom + '/players/' + myId);
+    const roomRef = db.ref('rooms/' + currentRoom);
+
+    // 1. CONFIGURAR AUTODESTRUIÇÃO AO FECHAR ABA
+    // Se o jogador sair, ele é removido da BD automaticamente
+    playerRef.onDisconnect().remove();
+
+    roomRef.get().then(snap => {
+        const data = snap.val();
+        
+        // Se a sala não existe ou está vazia, resetamos tudo
+        if (!data || !data.turn || !data.players) {
+            roomRef.update({ 
+                turn: myId, 
+                day: 1, 
+                phase: 'normal', 
+                lastRP: "A VOZ: Uma nova edição começa agora!" 
+            });
+        }
+        
+        // Entrar na sala
+        playerRef.set({ 
+            name: myName, pop: 50, status: 'playing', votes: 0, immune: false 
+        });
+
+        document.getElementById('lobby').style.display = 'none';
+        document.getElementById('game-room').style.display = 'flex';
+        initCanvas();
+        listen();
+        listenChat();
+    });
+}
+
+// --- ALTERA A TUA FUNÇÃO VOTE PARA LIMPAR A SALA NO FINAL ---
+
+function vote(tid) {
+    db.ref('rooms/' + currentRoom).get().then(snap => {
+        const data = snap.val();
+        const aliveIds = Object.keys(data.players).filter(id => data.players[id].status === 'playing');
+        const idx = aliveIds.indexOf(myId);
+        const isLast = (idx === aliveIds.length - 1);
+        let up = {};
+        
+        const vts = (data.players[tid].votes || 0) + 1;
+        up[`/players/${tid}/votes`] = vts;
+
+        if(isLast) {
+            let vic = tid; let mX = vts;
+            aliveIds.forEach(id => {
+                let v = (id === tid) ? vts : (data.players[id].votes || 0);
+                if(v > mX) { mX = v; vic = id; }
+            });
+
+            // Se após a expulsão só sobrar 1 pessoa, o jogo acabou!
+            if (aliveIds.length <= 2) {
+                const winnerId = aliveIds.find(id => id !== vic);
+                const winnerName = data.players[winnerId].name;
+                
+                alert("TEMOS VENCEDOR: " + winnerName);
+                
+                // Limpa a sala inteira para o próximo jogo
+                db.ref('rooms/' + currentRoom).remove();
+                location.reload(); // Recarrega a página de todos
+                return;
+            }
+
+            up['/players/' + vic + '/status'] = 'eliminated';
+            up['/phase'] = 'normal'; up['/day'] = 1;
+            up['/lastRP'] = `🔴 <b>A VOZ:</b> ${data.players[vic].name} foi expulso!`;
+            
+            // Limpa dados temporários
+            aliveIds.forEach(id => { 
+                up[`/players/${id}/votes`] = 0; 
+                up[`/players/${id}/immune`] = false; 
+            });
+            up['/drawings'] = null; 
+            up['/drawingVotes'] = null;
+        }
+        
+        up['/turn'] = aliveIds[(idx + 1) % aliveIds.length];
+        db.ref('rooms/' + currentRoom).update(up);
+    });
+}
 </script>
 </body>
 </html>
